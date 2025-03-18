@@ -1,31 +1,34 @@
 import { useState } from "react";
-import { auth, googleProvider, signInWithPopup, signOut } from "../utils/auth";
+import { auth, googleProvider, signInWithPopup, signOut, GoogleAuthProvider} from "../utils/auth";
 import { UnauthenticatedLayout } from "./UnauthenticatedLayout";
 import { AuthenticatedLayout } from "./AuthenticatedLayout";
-import { User } from "../utils/user";
+import { User } from "../utils/types";
+import { ButtonPrimary } from "./ButtonPrimary";
+import { GOOGLE_AUTH_STORAGE_KEY, storeToken } from "../utils/storage";
+import { UserCredential } from "firebase/auth";
 
 export const AuthWrapper = () => {
   const [user, setUser] = useState<User | null>(null);
-  const handleGoogleSignIn = () => {
-    googleProvider.addScope("https://www.googleapis.com/auth/userinfo.email");
-    // sign in with firebase
+  const handleSignIn = async () => {
     signInWithPopup(auth, googleProvider)
-      .then((resp: any) => {
-        const userData = resp.user;
-        // set current user
-        setUser({
-          displayName: userData.displayName,
-          email: userData.email,
-          photoURL: userData.photoURL,
+        .then((resp: UserCredential) => {
+          const credential = GoogleAuthProvider.credentialFromResult(resp);
+          storeToken(GOOGLE_AUTH_STORAGE_KEY, credential?.accessToken || "");
+
+          const userData = resp.user;
+          if (userData) {
+            setUser({
+            displayName: userData.displayName ?? "",
+            email: userData.email ?? "",
+          });
+          }
+        })
+        .catch((err: any) => {
+          console.error(err);
         });
-        console.log(resp);
-      })
-      .catch((err: any) => {
-        console.log(err);
-      });
   };
 
-  const handleGoogleSignOut = () => {
+  const handleSignOut = () => {
     // sign out with firebase
     signOut(auth)
       .then((resp: any) => {
@@ -39,21 +42,11 @@ export const AuthWrapper = () => {
 
   return (
     <div className="flex flex-col">
-      <div className="left-0 top-0 z-10 p-4 flex w-full shrink-0 items-center justify-start space-x-2 h-16 bg-cyan-700">
+      <div className="left-0 top-0 z-10 p-4 flex w-full shrink-0 items-center justify-start space-x-2 h-16 bg-cyan-600">
         {user ? (
-          <button
-            className="px-3 py-2 rounded-xl font-bold bg-cyan-500"
-            onClick={handleGoogleSignOut}
-          >
-            Sign out
-          </button>
+            <ButtonPrimary label="Sign Out" onClick={handleSignOut}/>
         ) : (
-          <button
-            className="px-3 py-2 rounded-xl font-bold bg-cyan-500"
-            onClick={handleGoogleSignIn}
-          >
-            Sign in with Google
-          </button>
+            <ButtonPrimary label="Sign in with Google" onClick={handleSignIn} />
         )}
       </div>
       <div className="mx-auto w-full p-8 pt-8">

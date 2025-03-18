@@ -1,4 +1,5 @@
 FROM python:3.12-slim AS base
+
 WORKDIR /app
 RUN pip install --no-cache-dir poetry
 
@@ -20,9 +21,9 @@ COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/pyth
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
 # Copy application files
-COPY . .
+COPY src src/
 
 # Expose server port
 EXPOSE 8080
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]
+CMD ["uvicorn", "src.server:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]
