@@ -30,9 +30,9 @@ SLACK_CLIENT_SECRET = os.environ.get("SLACK_CLIENT_SECRET")
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 
 # Parses the "Authorization" header for a request, and verifies the token is valid with Firebase
-# Also parses the "X-Google-Access-Token" header for the Google Access (OAuth) Token
+# Also parses the "X-OAuth-Access-Token" header for the Google (OAuth) Access Token
 # this token is required for making requests for making Google Calendar API requests
-def verify_authorization(authorization: str = Header(None), x_google_access_token: str = Header(None)) -> Authorization:
+def verify_authorization(authorization: str = Header(None), x_oauth_access_token: str = Header(None)) -> Authorization:
     if not authorization:
         raise HTTPException(status_code=401, detail="Request is missing Authorization header")
     
@@ -40,10 +40,10 @@ def verify_authorization(authorization: str = Header(None), x_google_access_toke
         token = authorization.split("Bearer ")[1]
         decoded = id_token.verify_firebase_token(token, requests.Request(), FIREBASE_PROJECT_ID)
         
-        if not x_google_access_token:
+        if not x_oauth_access_token:
             raise HTTPException(status_code=401, detail="Request is missing Google Access Token header")
         
-        return Authorization(id_token=token, access_token=x_google_access_token, data=decoded)
+        return Authorization(id_token=token, access_token=x_oauth_access_token, data=decoded)
     except Exception as e:
         print(e)
         raise HTTPException(status_code=401, detail="Invalid token")

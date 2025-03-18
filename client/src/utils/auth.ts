@@ -24,7 +24,7 @@ const getAuthHeaders = async () => {
   const accessToken = getToken(GOOGLE_AUTH_STORAGE_KEY);
   return {
     Authorization: `Bearer ${idToken}`,
-    "X-Google-Access-Token": accessToken ?? "",
+    "X-OAuth-Access-Token": accessToken ?? "",
   };
 };
 
