@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
-import google.oauth2
+from google.oauth2 import id_token, credentials
 from google.auth.transport import requests
 from googleapiclient.discovery import build
 import os
@@ -36,13 +36,13 @@ def verify_authorization(authorization: str = Header(None), x_google_access_toke
         raise HTTPException(status_code=401, detail="Request is missing Authorization header")
     
     try:
-        id_token = authorization.split("Bearer ")[1]
-        decoded = google.oauth2.id_token.verify_firebase_token(id_token, requests.Request(), GOOGLE_CLIENT_ID)
+        token = authorization.split("Bearer ")[1]
+        decoded = id_token.verify_firebase_token(token, requests.Request(), GOOGLE_CLIENT_ID)
         
         if not x_google_access_token:
             raise HTTPException(status_code=401, detail="Request is missing Google Access Token header")
         
-        return Authorization(id_token=id_token, access_token=x_google_access_token, data=decoded)
+        return Authorization(id_token=token, access_token=x_google_access_token, data=decoded)
     except Exception as e:
         print(e)
         raise HTTPException(status_code=401, detail="Invalid token")
@@ -86,8 +86,8 @@ async def get_user(auth: Authorization = Depends(verify_authorization)):
 # Returns a list of all Google Calendar objects for a user
 @app.get("/calendars", response_model=list[Calendar])
 async def get_calendars(auth: Authorization = Depends(verify_authorization)):
-    credentials = google.oauth2.credentials.Credentials(token=auth.access_token)
-    service = build('calendar', 'v3', credentials=credentials)
+    cred = credentials.Credentials(token=auth.access_token)
+    service = build('calendar', 'v3', credentials=cred)
     try:
         calendars = service.calendarList().list().execute()
         items = calendars.get('items', [])
@@ -111,8 +111,8 @@ async def get_calendars(auth: Authorization = Depends(verify_authorization)):
 # Returns a list of all events for a given Google Calendar
 @app.get("/calendars/{calendar_id}/events", response_model=list[CalendarEvent])
 async def get_calendar_events(calendar_id: str, auth: Authorization = Depends(verify_authorization)):
-    credentials = google.oauth2.credentials.Credentials(token=auth.access_token)
-    service = build('calendar', 'v3', credentials=credentials)
+    cred = credentials.Credentials(token=auth.access_token)
+    service = build('calendar', 'v3', credentials=cred)
     try:
         # Get events in the specified calendar, *after* the current time
         events = service.events().list(calendarId=calendar_id, timeMin=datetime.now(timezone.utc).isoformat()).execute()
