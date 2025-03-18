@@ -24,6 +24,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+FIREBASE_PROJECT_ID = os.environ.get("FIREBASE_PROJECT_ID")
 SLACK_CLIENT_ID = os.environ.get("SLACK_CLIENT_ID")
 SLACK_CLIENT_SECRET = os.environ.get("SLACK_CLIENT_SECRET")
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
@@ -37,7 +38,7 @@ def verify_authorization(authorization: str = Header(None), x_google_access_toke
     
     try:
         token = authorization.split("Bearer ")[1]
-        decoded = id_token.verify_firebase_token(token, requests.Request(), GOOGLE_CLIENT_ID)
+        decoded = id_token.verify_firebase_token(token, requests.Request(), FIREBASE_PROJECT_ID)
         
         if not x_google_access_token:
             raise HTTPException(status_code=401, detail="Request is missing Google Access Token header")
