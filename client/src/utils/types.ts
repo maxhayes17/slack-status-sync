@@ -11,9 +11,9 @@ export type Calendar = {
 };
 
 type CalendarEventDate = {
-  date: string;
-  dateTime: string;
-  timeZone: string;
+  date?: string;
+  dateTime?: string;
+  timeZone?: string;
 };
 export type CalendarEvent = {
   id: string;
