@@ -10,15 +10,22 @@ export type Calendar = {
   timezone: string;
 };
 
-type CalendarEventDate = {
-  date?: string;
-  dateTime?: string;
-  timeZone?: string;
-};
 export type CalendarEvent = {
   id: string;
+  calendarId: string;
   summary: string;
   description: string;
-  start: CalendarEventDate;
-  end: CalendarEventDate;
+  start: string;
+  end: string;
+  allDay: boolean;
+};
+
+export type StatusEvent = {
+  id: string;
+  calendarId: string;
+  eventId: string;
+  start: string;
+  end: string;
+  statusText: string;
+  statusEmoji: string;
 };

@@ -6,21 +6,23 @@ import { User } from "../utils/types";
 import { ButtonPrimary } from "./ButtonPrimary";
 import { GOOGLE_AUTH_STORAGE_KEY, storeToken } from "../utils/storage";
 import { UserCredential } from "firebase/auth";
+import { getUser } from "../utils/utils";
 
 export const AuthWrapper = () => {
   const [user, setUser] = useState<User | null>(null);
   const handleSignIn = async () => {
     signInWithPopup(auth, googleProvider)
-        .then((resp: UserCredential) => {
+        .then(async (resp: UserCredential) => {
           const credential = GoogleAuthProvider.credentialFromResult(resp);
           storeToken(GOOGLE_AUTH_STORAGE_KEY, credential?.accessToken || "");
 
           const userData = resp.user;
           if (userData) {
+            const user = await getUser();
             setUser({
-            displayName: userData.displayName ?? "",
-            email: userData.email ?? "",
-          });
+              displayName: user?.displayName ?? "",
+              email: user?.email ?? "",
+            });
           }
         })
         .catch((err: any) => {

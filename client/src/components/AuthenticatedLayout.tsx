@@ -1,10 +1,9 @@
-import { Calendar, CalendarEvent, User } from "../utils/types";
-import { ButtonPrimary } from "./ButtonPrimary";
-import { getCalendarEvents, getCalendars, getUser } from "../utils/utils";
+import { Calendar, CalendarEvent, StatusEvent, User } from "../utils/types";
+import { getCalendarEvents, getCalendars, getStatusEvents } from "../utils/utils";
 import { CalendarSelect } from "./CalendarSelect";
 import { useEffect, useState } from "react";
 import { CalendarEventsList } from "./CalendarEventsList";
-import { StatusEvent } from "./StatusEvent";
+import { StatusEventBlock } from "./StatusEventBlock";
 import { ButtonAddToSlack } from "./ButtonAddToSlack";
 
 type AuthenticatedLayoutProps = {
@@ -18,6 +17,7 @@ export const AuthenticatedLayout = ({ user }: AuthenticatedLayoutProps) => {
     null
   );
 
+  const [statusEvents, setStatusEvents] = useState<StatusEvent[] | null>(null);
   const getCalendarsData = async () => {
     const resp = await getCalendars();
     setCalendars(resp);
@@ -27,18 +27,24 @@ export const AuthenticatedLayout = ({ user }: AuthenticatedLayoutProps) => {
     setCalendarEvents(resp);
   };
 
+  const getStatusEventsData = async () => {
+    const resp = await getStatusEvents();
+    setStatusEvents(resp);
+  };
+
   const handleCalendarSelect = (calendar: Calendar) => {
     setCurrentCalendar(calendar);
     getCalendarEventsData(calendar.id);
   };
   useEffect(() => {
     getCalendarsData();
+    getStatusEventsData();
   }, []);
 
   const slackEnabled = false;
   return (
     <div>
-      <div className="grid grid-cols-3 space-x-4">
+      <div className="grid grid-cols-3 space-x-4 h-[85vh]">
         <div className="col-span-1 flex flex-col space-y-4 text-left">
           <p className="text-4xl font-extrabold">
             Welcome, {user.displayName}!
@@ -49,7 +55,7 @@ export const AuthenticatedLayout = ({ user }: AuthenticatedLayoutProps) => {
               <ButtonAddToSlack />
             </div>
           )}
-          <div className="flex flex-col space-y-8 pt-4">
+          <div className="flex flex-col pt-4 space-y-4">
             {calendars && (
               <CalendarSelect
                 calendars={calendars}
@@ -57,13 +63,15 @@ export const AuthenticatedLayout = ({ user }: AuthenticatedLayoutProps) => {
                 onSelect={handleCalendarSelect}
               />
             )}
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-2 justify-items-end">
               <p className="font-bold pl-1">Your Status Events</p>
-              <StatusEvent />
+              {statusEvents && statusEvents.map(event => (
+                <StatusEventBlock key={event.id} event={event} />
+              ))}
             </div>
           </div>
         </div>
-        <div className="col-span-2">
+        <div className="col-span-2 overflow-y-scroll pr-4">
           {currentCalendar && calendarEvents && (
             <div className="flex flex-col space-y-4">
               <p className="text-2xl font-bold pb-2">
