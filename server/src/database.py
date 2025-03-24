@@ -30,7 +30,7 @@ def patch_user(user: User) -> User:
     return User(id=user.id, **user_data)
 
 
-def get_user(user_id: str) -> User:
+def get_user_by_id(user_id: str) -> User:
     user = db.collection("users").document(user_id).get()
     return User(id=user.id, **user.to_dict())
 

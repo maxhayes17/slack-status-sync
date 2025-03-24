@@ -16,7 +16,7 @@ from src.models import (
     StatusEventRequest,
 )
 from src.database import (
-    get_user,
+    get_user_by_id,
     get_user_by_firebase_user_id,
     put_user,
     patch_user,
@@ -103,7 +103,7 @@ async def root():
 async def auth_slack_callback(request: Request, code: str, state: str):
 
     # user id maintained in state param to verify user
-    user = get_user(state)
+    user = get_user_by_id(state)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
