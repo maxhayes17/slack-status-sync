@@ -15,15 +15,15 @@ export const AuthWrapper = () => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         const userData = await getUser();
-        setUser({
+        setUser({          
+          id: userData?.id ?? "",
           displayName: userData?.displayName ?? "",
           email: userData?.email ?? "",
         });
       } else {
         setUser(null);
       }
-    }
-    );
+    });
     return () => unsubscribe();
   }, []);
 
@@ -39,6 +39,7 @@ export const AuthWrapper = () => {
           if (userData) {
             const user = await getUser();
             setUser({
+              id: user?.id ?? "",
               displayName: user?.displayName ?? "",
               email: user?.email ?? "",
             });

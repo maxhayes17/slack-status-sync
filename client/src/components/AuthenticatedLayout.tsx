@@ -63,18 +63,15 @@ export const AuthenticatedLayout = ({ user }: AuthenticatedLayoutProps) => {
           <p className="text-4xl font-extrabold">
             Welcome, {user.displayName}!
           </p>
-          {slackEnabled && (
-            <div className="flex flex-row items-center justify-start space-x-2">
-              {/* <p className="font-bold">To start Syncing, </p> */}
-              <ButtonAddToSlack />
-              <Button
-                className="text-blue-600 font-bold italic text-sm"
-                onClick={openModal}
-              >
-                (?) How it works
-              </Button>
-            </div>
-          )}
+          <div className="flex flex-row items-center justify-start space-x-3">
+            {slackEnabled && <ButtonAddToSlack user={user}/>}
+            <Button
+              className="text-blue-600 font-bold italic text-sm"
+              onClick={openModal}
+            >
+              (?) How it works
+            </Button>
+          </div>
           <div className="flex flex-col pt-4 space-y-4">
             {calendars && calendars.length > 0 && (
               <CalendarSelect

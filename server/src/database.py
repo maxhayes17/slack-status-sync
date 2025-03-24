@@ -16,6 +16,25 @@ def put_user(user: User) -> User:
     return User(id=new_user.id, **user_data)
 
 
+def patch_user(user: User) -> User:
+    # update user
+    db_user = db.collection("users").document(user.id)
+    user_data = {
+        "firebase_user_id": user.firebase_user_id,
+        "email": user.email,
+        "display_name": user.display_name,
+        "slack_user_id": user.slack_user_id,
+        "slack_access_token": user.slack_access_token,
+    }
+    db_user.update(user_data)
+    return User(id=user.id, **user_data)
+
+
+def get_user(user_id: str) -> User:
+    user = db.collection("users").document(user_id).get()
+    return User(id=user.id, **user.to_dict())
+
+
 # Get user by their email (should be unique)
 def get_user_by_email(email: str) -> User:
     users = db.collection("users").where("email", "==", email).limit(1).stream()

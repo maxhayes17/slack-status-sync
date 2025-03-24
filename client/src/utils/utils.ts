@@ -11,7 +11,11 @@ export const getUser = async (): Promise<User | null> => {
     });
     const data = await resp.json();
     console.log(data);
-    return { displayName: data.display_name, email: data.email } as User;
+    return {
+      id: data.id,
+      displayName: data.display_name,
+      email: data.email,
+    } as User;
   } catch (error) {
     console.error("Error fetching user data:", error);
     return null;

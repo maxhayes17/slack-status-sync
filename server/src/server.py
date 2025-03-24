@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException, Header, Depends
+from fastapi import FastAPI, HTTPException, Header, Depends, Request
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from google.oauth2 import id_token, credentials
 from google.auth.transport import requests
@@ -14,8 +15,10 @@ from src.models import (
     StatusEventRequest,
 )
 from src.database import (
+    get_user,
     get_user_by_firebase_user_id,
     put_user,
+    patch_user,
     put_status_event,
     get_status_events_by_user,
 )
@@ -39,6 +42,12 @@ FIREBASE_PROJECT_ID = os.environ.get("FIREBASE_PROJECT_ID")
 SLACK_CLIENT_ID = os.environ.get("SLACK_CLIENT_ID")
 SLACK_CLIENT_SECRET = os.environ.get("SLACK_CLIENT_SECRET")
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+
+
+SERVER_URL = "https://slack-status-syncer-server-801397650398.us-central1.run.app"
+CLIENT_URL = "https://slack-status-syncer-801397650398.us-central1.run.app"
+
+SLACK_REDIRECT_URI = f"{SERVER_URL}/auth/slack/callback"
 
 
 # Parses the "Authorization" header for a request, and verifies the token is valid with Firebase
@@ -86,12 +95,50 @@ async def root():
 
 
 ############################################
-# AUTH ROUTES
+# SLACK ROUTES
 ############################################
 # Auth with Slack
-# @app.post("/auth/slack")
-# async def auth_slack():
-#     return {"message": "You are now auth'd with Slack!"}
+@app.get("/auth/slack/callback")
+async def auth_slack_callback(request: Request, code: str, state: str):
+
+    # user id maintained in state param to verify user
+    user = get_user(state)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    token_url = "https://slack.com/api/oauth.v2.access"
+    params = {
+        "client_id": SLACK_CLIENT_ID,
+        "client_secret": SLACK_CLIENT_SECRET,
+        "code": code,
+        "redirect_uri": SLACK_REDIRECT_URI,
+    }
+
+    response = requests.post(token_url, data=params)
+    data = response.json()
+
+    if not data.get("ok"):
+        raise HTTPException(status_code=400, detail="Failed Authenticating with Slack")
+
+    # Update user with slack user id and access token
+    user.slack_user_id = data["authed_user"]["id"]
+    user.slack_access_token = data["authed_user"]["access_token"]
+    patch_user(user)
+
+    return RedirectResponse(url=f"{FRONTEND_URL}?slack=success")
+
+
+@app.get("/slack/emojis")
+async def get_slack_emojis(auth: Authorization = Depends(verify_authorization)):
+    try:
+        # resolve user from auth
+        user = resolve_user(auth)
+        # get user's slack access token
+        # TODO - get slack emojis
+        return []
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Error retrieving slack emojis")
 
 
 ############################################

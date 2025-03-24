@@ -15,6 +15,7 @@ class User(BaseModel):
     email: str
     display_name: str
     # TODO - where should these be stored?
+    slack_user_id: Optional[str] = None
     slack_access_token: Optional[str] = None
 
 

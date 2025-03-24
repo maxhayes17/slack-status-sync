@@ -30,28 +30,28 @@ export const ModalHowItWorks = ({ isOpen, onClose }: ModalHowItWorksProps) => {
           </li>
           <li className="flex flex-col space-y-2">
             <p>
-              Choose an Event from one of your Calendars, and click{" "}
+              Choose an event from one of your calendars, and click{" "}
               <span className="ml-1">
                 <ButtonPrimary label="Add Status" />
               </span>
             </p>
             <p className="text-sm text-neutral-600 italic">
-              **Only one-time events are supported for Status syncs. If you
+              **Only one-time events are supported for status syncs. If you
               choose a recurring event, the status will stop syncing after the
               first occurrence.
             </p>
           </li>
           <li className="flex flex-col space-y-2">
             <p className="leading-loose">
-              Choose the status text, and optionally an Emoji from your Slack
+              Choose the status text, and optionally an emoji from your Slack
               workspace for the event, and click{" "}
               <span className="ml-1 leading-normal">
                 <ButtonPrimary label="Create" />
               </span>
             </p>
             <p className="text-sm text-neutral-600 italic">
-              Status Events can be updated until the event starts. After the
-              event starts, no changes to the Status Event will be reflected in
+              Status events can be updated until the event starts. After the
+              event starts, no changes to the status event will be reflected in
               Slack.
             </p>
           </li>
