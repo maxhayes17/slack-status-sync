@@ -9,7 +9,6 @@ type ButtonAddToSlackProps = {
 export const ButtonAddToSlack = ({ user }: ButtonAddToSlackProps) => {
   const SLACK_AUTH_URL = `${SLACK_OAUTH_URL}&state=${user?.id}`;
 
-export const ButtonAddToSlack = () => {
   return (
     <a href={SLACK_AUTH_URL} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg font-bold text-white bg-aubergine flex flex-row items-center hover:brightness-110">
       <svg
