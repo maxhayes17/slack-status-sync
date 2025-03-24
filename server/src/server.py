@@ -1,8 +1,9 @@
+import requests
 from fastapi import FastAPI, HTTPException, Header, Depends, Request
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from google.oauth2 import id_token, credentials
-from google.auth.transport import requests
+from google.auth.transport import requests as google_requests
 from googleapiclient.discovery import build
 import os
 from src.models import (
@@ -65,7 +66,7 @@ def verify_authorization(
         token = authorization.split("Bearer ")[1]
         # TODO - this is not very secure - should verify with firebase service account?
         decoded = id_token.verify_firebase_token(
-            token, requests.Request(), FIREBASE_PROJECT_ID
+            token, google_requests.Request(), FIREBASE_PROJECT_ID
         )
 
         # TODO - should actually verify this token
@@ -125,7 +126,7 @@ async def auth_slack_callback(request: Request, code: str, state: str):
     user.slack_access_token = data["authed_user"]["access_token"]
     patch_user(user)
 
-    return RedirectResponse(url=f"{FRONTEND_URL}?slack=success")
+    return RedirectResponse(url=f"{CLIENT_URL}?slack=success")
 
 
 @app.get("/slack/emojis")
