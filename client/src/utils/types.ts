@@ -3,10 +3,16 @@ export type User = {
   email: string;
 };
 
+export type CalendarColor = {
+  background: string;
+  foreground: string;
+};
+
 export type Calendar = {
   id: string;
   summary: string;
   description: string;
+  color?: CalendarColor;
   timezone: string;
 };
 
@@ -15,6 +21,7 @@ export type CalendarEvent = {
   calendarId: string;
   summary: string;
   description: string;
+  color?: CalendarColor;
   start: string;
   end: string;
   allDay: boolean;
@@ -27,5 +34,5 @@ export type StatusEvent = {
   start: string;
   end: string;
   statusText: string;
-  statusEmoji: string;
+  statusEmoji?: string;
 };

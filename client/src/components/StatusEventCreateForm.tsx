@@ -23,7 +23,7 @@ export const StatusEventCreateForm = ({
   onSubmit,
   onCancel,
 }: StatusEventCreateFormProps) => {
-  
+
   const INITIAL_STATUS_EVENT: Partial<StatusEvent> = {
     calendarId: event.calendarId,
     eventId: event.id,
@@ -38,7 +38,7 @@ export const StatusEventCreateForm = ({
     setStatusEvent({ ...statusEvent, [key]: value });
   };
 
-  const isValid = statusEvent.statusText && statusEvent.statusEmoji;
+  const isValid = statusEvent.statusText;
 
   return (
     <Fieldset className="grid grid-cols-3 gap-4">
@@ -46,7 +46,7 @@ export const StatusEventCreateForm = ({
         Status Details
       </Legend>
       <Field className={"col-span-2"}>
-        <Label className="ml-1 font-bold">Status Text</Label>
+        <Label className="ml-1 font-bold">* Status Text</Label>
         <Input
           className="w-full py-2 rounded-lg border-none bg-neutral-100 pr-8 pl-3 text-md focus:outline-none mt-1"
           name="statusText"

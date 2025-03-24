@@ -19,11 +19,19 @@ class User(BaseModel):
 
 
 # Google Calendar objects
+
+
+class CalendarColor(BaseModel):
+    background: str
+    foreground: str
+
+
 class Calendar(BaseModel):
     id: str
     user_id: str
     summary: str
     description: str
+    color: Optional[CalendarColor] = None
     timezone: str
 
 
@@ -32,6 +40,7 @@ class CalendarEvent(BaseModel):
     calendar_id: str
     summary: str
     description: str
+    color: Optional[CalendarColor] = None
     start: datetime
     end: datetime
     all_day: bool
@@ -46,7 +55,7 @@ class StatusEvent(BaseModel):
     start: datetime
     end: datetime
     status_text: str
-    status_emoji: str
+    status_emoji: Optional[str] = None
     # unix timestamp of end time
     status_expiration: float
 
@@ -57,4 +66,4 @@ class StatusEventRequest(BaseModel):
     start: datetime
     end: datetime
     statusText: str
-    statusEmoji: str
+    statusEmoji: Optional[str] = None

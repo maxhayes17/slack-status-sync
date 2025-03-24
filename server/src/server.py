@@ -9,6 +9,7 @@ from src.models import (
     User,
     Calendar,
     CalendarEvent,
+    CalendarColor,
     StatusEvent,
     StatusEventRequest,
 )
@@ -135,7 +136,7 @@ async def post_status_event(
             start=event.start,
             end=event.end,
             status_text=event.statusText,
-            status_emoji=event.statusEmoji,
+            status_emoji=event.statusEmoji if event.statusEmoji else None,
             status_expiration=event.end.timestamp(),  # Unix timestamp of end
         )
         return put_status_event(status_event)
@@ -176,6 +177,10 @@ async def get_calendars(auth: Authorization = Depends(verify_authorization)):
                 user_id=auth.data["sub"],
                 summary=item["summary"],
                 description=item.get("description", ""),
+                color=CalendarColor(
+                    background=item["backgroundColor"],
+                    foreground=item["foregroundColor"],
+                ),
                 timezone=item["timeZone"],
             )
             for item in items
@@ -197,6 +202,10 @@ async def get_calendar_events(
     cred = credentials.Credentials(token=auth.access_token)
     service = build("calendar", "v3", credentials=cred)
     try:
+        # Get color themes for calendar events
+        colors = service.colors().get().execute()
+        event_colors = colors.get("event", {})
+
         # Set constraints for the current day, and a year from the current day
         time_now = datetime.now(timezone.utc)
         time_max = time_now + timedelta(days=365)
@@ -217,6 +226,11 @@ async def get_calendar_events(
                 calendar_id=calendar_id,
                 summary=item.get("summary", ""),
                 description=item.get("description", ""),
+                color=(
+                    CalendarColor(**event_colors.get(item["colorId"], {}))
+                    if "colorId" in item
+                    else None
+                ),
                 start=parse_event_time(item["start"]),
                 end=parse_event_time(item["end"]),
                 # True if the "date" field is present, which only occurs for all-day events

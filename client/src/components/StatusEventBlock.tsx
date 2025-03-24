@@ -13,7 +13,7 @@ export const StatusEventBlock = ({ event }: StatusEventBlockProps) => {
           alt="Emoji"
           className="w-6 h-6"
         /> */}
-        <p>{event.statusEmoji}</p>
+        {event.statusEmoji && <p>{event.statusEmoji}</p>}
         <p className="font-bold">{event.statusText}</p>
       </div>
       <p className="text-sm">

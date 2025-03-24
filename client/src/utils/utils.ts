@@ -29,6 +29,7 @@ export const getCalendars = async (): Promise<Calendar[] | null> => {
         id: calendar.id,
         summary: calendar.summary,
         description: calendar.description,
+        color: calendar.color,
         timezone: calendar.timezone,
       } as Calendar;
     });
@@ -61,6 +62,7 @@ export const getCalendarEvents = async (
         calendarId: event.calendar_id,
         summary: event.summary,
         description: event.description,
+        color: event.color,
         start: event.start,
         end: event.end,
         allDay: event.all_day,

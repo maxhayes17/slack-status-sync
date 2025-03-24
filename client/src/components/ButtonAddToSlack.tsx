@@ -1,6 +1,8 @@
+import { Button } from "@headlessui/react";
+
 export const ButtonAddToSlack = () => {
   return (
-    <button className="px-4 py-2 rounded-xl font-bold text-white bg-aubergine flex flex-row items-center hover:brightness-110">
+    <Button className="px-4 py-2 rounded-lg font-bold text-white bg-aubergine flex flex-row items-center hover:brightness-110">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="h-[20px] w-[20px] mr-[12px]"
@@ -24,6 +26,6 @@ export const ButtonAddToSlack = () => {
         ></path>
       </svg>
       Add to Slack
-    </button>
+    </Button>
   );
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { auth, googleProvider, signInWithPopup, signOut, GoogleAuthProvider} from "../utils/auth";
 import { UnauthenticatedLayout } from "./UnauthenticatedLayout";
 import { AuthenticatedLayout } from "./AuthenticatedLayout";
@@ -10,6 +10,25 @@ import { getUser } from "../utils/utils";
 
 export const AuthWrapper = () => {
   const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const userData = await getUser();
+        setUser({
+          displayName: userData?.displayName ?? "",
+          email: userData?.email ?? "",
+        });
+      } else {
+        setUser(null);
+      }
+    }
+    );
+    return () => unsubscribe();
+  }, []);
+
+
+
   const handleSignIn = async () => {
     signInWithPopup(auth, googleProvider)
         .then(async (resp: UserCredential) => {
@@ -43,8 +62,8 @@ export const AuthWrapper = () => {
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="left-0 top-0 z-10 p-4 flex w-full shrink-0 items-center justify-start space-x-2 h-16 bg-cyan-600">
+    <div className="flex flex-col max-h-full">
+      <div className="left-0 top-0 z-10 p-4 flex w-full shrink-0 items-center justify-start space-x-2 h-16 bg-neutral-200">
         {user ? (
             <ButtonPrimary label="Sign Out" onClick={handleSignOut}/>
         ) : (

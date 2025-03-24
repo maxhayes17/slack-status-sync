@@ -1,10 +1,16 @@
 import { Calendar, CalendarEvent, StatusEvent, User } from "../utils/types";
-import { getCalendarEvents, getCalendars, getStatusEvents } from "../utils/utils";
+import {
+  getCalendarEvents,
+  getCalendars,
+  getStatusEvents,
+} from "../utils/utils";
 import { CalendarSelect } from "./CalendarSelect";
 import { useEffect, useState } from "react";
 import { CalendarEventsList } from "./CalendarEventsList";
-import { StatusEventBlock } from "./StatusEventBlock";
 import { ButtonAddToSlack } from "./ButtonAddToSlack";
+import { StatusEventsList } from "./StatusEventsList";
+import { Button } from "@headlessui/react";
+import { ModalHowItWorks } from "./ModalHowItWorks";
 
 type AuthenticatedLayoutProps = {
   user: User;
@@ -21,6 +27,10 @@ export const AuthenticatedLayout = ({ user }: AuthenticatedLayoutProps) => {
   const getCalendarsData = async () => {
     const resp = await getCalendars();
     setCalendars(resp);
+    if (resp && resp.length > 0) {
+      setCurrentCalendar(resp[0]);
+      getCalendarEventsData(resp[0].id);
+    }
   };
   const getCalendarEventsData = async (calendarId: string) => {
     const resp = await getCalendarEvents(calendarId);
@@ -41,34 +51,44 @@ export const AuthenticatedLayout = ({ user }: AuthenticatedLayoutProps) => {
     getStatusEventsData();
   }, []);
 
-  const slackEnabled = false;
+  const [isOpen, setIsOpen] = useState(false);
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => setIsOpen(false);
+
+  const slackEnabled = true;
   return (
     <div>
-      <div className="grid grid-cols-3 space-x-4 h-[85vh]">
-        <div className="col-span-1 flex flex-col space-y-4 text-left">
+      <div className="grid grid-cols-3 space-x-8 h-[85vh]">
+        <div className="col-span-1 flex flex-col space-y-6 text-left">
           <p className="text-4xl font-extrabold">
             Welcome, {user.displayName}!
           </p>
           {slackEnabled && (
-            <div className="flex flex-row items-center justify-start sm:flex-col sm:items-start sm:space-y-2">
-              <p className="font-bold">To start Syncing, </p>
+            <div className="flex flex-row items-center justify-start space-x-2">
+              {/* <p className="font-bold">To start Syncing, </p> */}
               <ButtonAddToSlack />
+              <Button
+                className="text-blue-600 font-bold italic text-sm"
+                onClick={openModal}
+              >
+                (?) How it works
+              </Button>
             </div>
           )}
           <div className="flex flex-col pt-4 space-y-4">
-            {calendars && (
+            {calendars && calendars.length > 0 && (
               <CalendarSelect
                 calendars={calendars}
                 label="Select a Calendar"
                 onSelect={handleCalendarSelect}
               />
             )}
-            <div className="flex flex-col space-y-2 justify-items-end">
-              <p className="font-bold pl-1">Your Status Events</p>
-              {statusEvents && statusEvents.map(event => (
-                <StatusEventBlock key={event.id} event={event} />
-              ))}
-            </div>
+            {statusEvents && statusEvents.length > 0 && (
+              <div className="flex flex-col space-y-2">
+                <p className="font-bold pl-1">Your Status Events</p>
+                <StatusEventsList events={statusEvents} />
+              </div>
+            )}
           </div>
         </div>
         <div className="col-span-2 overflow-y-scroll pr-4">
@@ -80,12 +100,15 @@ export const AuthenticatedLayout = ({ user }: AuthenticatedLayoutProps) => {
                   {currentCalendar.summary}
                 </span>
               </p>
-              <CalendarEventsList events={calendarEvents} />
+              <CalendarEventsList
+                events={calendarEvents}
+                calendar={currentCalendar}
+              />
             </div>
           )}
         </div>
       </div>
-      <div className="col-span-1 flex flex-col space-y-4 text-left bg-green-200"></div>
+      <ModalHowItWorks isOpen={isOpen} onClose={closeModal} />
     </div>
   );
 };
