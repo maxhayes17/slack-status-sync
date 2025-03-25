@@ -63,7 +63,13 @@ export const AuthenticatedLayout = ({ user }: AuthenticatedLayoutProps) => {
             Welcome, {user.displayName}!
           </p>
           <div className="flex flex-row items-center justify-start space-x-3">
-            {!user.slack_user_id && <ButtonAddToSlack />}
+            {user.slack_user_id ? (
+              <p className="font-extrabold text-green-600">
+                Connected to Slack
+              </p>
+            ) : (
+              <ButtonAddToSlack />
+            )}
             <Button
               className="text-blue-600 font-bold italic text-sm"
               onClick={openModal}

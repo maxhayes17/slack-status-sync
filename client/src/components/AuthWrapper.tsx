@@ -19,6 +19,7 @@ export const AuthWrapper = () => {
           id: userData?.id ?? "",
           displayName: userData?.displayName ?? "",
           email: userData?.email ?? "",
+          slack_user_id: userData?.slack_user_id ?? "",
         });
       } else {
         setUser(null);
@@ -42,6 +43,7 @@ export const AuthWrapper = () => {
               id: user?.id ?? "",
               displayName: user?.displayName ?? "",
               email: user?.email ?? "",
+              slack_user_id: user?.slack_user_id ?? "",
             });
           }
         })
