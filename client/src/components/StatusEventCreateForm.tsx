@@ -5,13 +5,14 @@ import {
   Input,
   Label,
   Legend,
-  Select,
 } from "@headlessui/react";
-import { CalendarEvent } from "../utils/types";
+import { CalendarEvent, Emoji } from "../utils/types";
 import { formatDateTime } from "../utils/date";
 import { StatusEvent } from "../utils/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ButtonPrimary } from "./ButtonPrimary";
+import { getSlackEmojis } from "../utils/utils";
+import { EmojiSelect } from "./EmojiSelect";
 
 type StatusEventCreateFormProps = {
   event: CalendarEvent;
@@ -23,7 +24,6 @@ export const StatusEventCreateForm = ({
   onSubmit,
   onCancel,
 }: StatusEventCreateFormProps) => {
-
   const INITIAL_STATUS_EVENT: Partial<StatusEvent> = {
     calendarId: event.calendarId,
     eventId: event.id,
@@ -34,9 +34,19 @@ export const StatusEventCreateForm = ({
   const [statusEvent, setStatusEvent] =
     useState<Partial<StatusEvent>>(INITIAL_STATUS_EVENT);
 
-  const handleChange = (key: keyof StatusEvent, value: string) => {
+  const [slackEmojis, setSlackEmojis] = useState<Emoji[] | null>(null);
+  const getSlackEmojiData = async () => {
+    const resp = await getSlackEmojis();
+    setSlackEmojis(resp);
+  };
+
+  const handleChange = (key: keyof StatusEvent, value: string | Emoji) => {
     setStatusEvent({ ...statusEvent, [key]: value });
   };
+
+  useEffect(() => {
+    getSlackEmojiData();
+  }, []);
 
   const isValid = statusEvent.statusText;
 
@@ -54,18 +64,17 @@ export const StatusEventCreateForm = ({
           onChange={(e) => handleChange("statusText", e.target.value)}
         />
       </Field>
-      <Field className={"col-span-1"}>
-        <Label className="ml-1 font-bold">Status Emoji</Label>
-        <Select
-          className="w-full py-2 rounded-lg border-none bg-neutral-100 pr-8 pl-3 text-md focus:outline-none mt-1"
-          name="statusEmoji"
-          onChange={(e) => handleChange("statusEmoji", e.target.value)}
-        >
-          <option>😀</option>
-          <option>😢</option>
-          <option>😎</option>
-        </Select>
-      </Field>
+      {slackEmojis && (
+        <Field className={"col-span-1"}>
+          <Label className="ml-1 font-bold">Status Emoji</Label>
+          <div className="mt-1">
+            <EmojiSelect
+              emojis={slackEmojis}
+              onSelect={(emoji) => handleChange("statusEmoji", emoji)}
+            />
+          </div>
+        </Field>
+      )}
       {statusEvent.start && statusEvent.end && (
         <Label className="col-span-full ml-1 italic">
           From {formatDateTime(statusEvent.start, false)} to{" "}
@@ -73,7 +82,12 @@ export const StatusEventCreateForm = ({
         </Label>
       )}
       <div className="col-span-full flex flex-row justify-end space-x-4">
-        <Button onClick={onCancel} className="text-red-600 font-semibold hover:text-red-500">Cancel</Button>
+        <Button
+          onClick={onCancel}
+          className="text-red-600 font-semibold hover:text-red-500"
+        >
+          Cancel
+        </Button>
         <ButtonPrimary
           label="Create"
           onClick={() => onSubmit(statusEvent)}

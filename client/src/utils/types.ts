@@ -29,6 +29,11 @@ export type CalendarEvent = {
   allDay: boolean;
 };
 
+export type Emoji = {
+  name: string;
+  path: string;
+};
+
 export type StatusEvent = {
   id: string;
   calendarId: string;
@@ -36,5 +41,5 @@ export type StatusEvent = {
   start: string;
   end: string;
   statusText: string;
-  statusEmoji?: string;
+  statusEmoji?: Emoji;
 };

@@ -12,6 +12,7 @@ from src.models import (
     Calendar,
     CalendarEvent,
     CalendarColor,
+    Emoji,
     StatusEvent,
     StatusEventRequest,
 )
@@ -117,15 +118,14 @@ async def auth_slack_callback(request: Request, code: str, state: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    token_url = "https://slack.com/api/oauth.v2.access"
+    path = "https://slack.com/api/oauth.v2.access"
     params = {
         "client_id": SLACK_CLIENT_ID,
         "client_secret": SLACK_CLIENT_SECRET,
         "code": code,
         "redirect_uri": SLACK_REDIRECT_URI,
     }
-
-    response = requests.post(token_url, data=params)
+    response = requests.post(path, data=params)
     data = response.json()
 
     if not data.get("ok"):
@@ -144,9 +144,31 @@ async def get_slack_emojis(auth: Authorization = Depends(verify_authorization)):
     try:
         # resolve user from auth
         user = resolve_user(auth)
-        # get user's slack access token
-        # TODO - get slack emojis
-        return []
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        token = user.slack_access_token
+        if not token:
+            raise HTTPException(
+                status_code=400, detail="User has not authenticated with Slack"
+            )
+
+        path = "https://slack.com/api/emoji.list"
+        headers = {"Authorization": f"Bearer {token}"}
+        response = requests.get(path, headers=headers)
+        data = response.json()
+
+        if not data.get("ok"):
+            raise HTTPException(
+                status_code=400, detail="Failed retrieving emojis from Slack"
+            )
+
+        return [
+            Emoji(name=k, path=v)
+            for k, v in data["emoji"].items()
+            # some emojis are aliases for other emojis... ignore these for now
+            if v.startswith("http")
+        ]
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error retrieving slack emojis")
@@ -194,7 +216,7 @@ async def post_status_event(
             start=event.start,
             end=event.end,
             status_text=event.statusText,
-            status_emoji=event.statusEmoji if event.statusEmoji else None,
+            status_emoji=event.statusEmoji,
             status_expiration=event.end.timestamp(),  # Unix timestamp of end
         )
         return put_status_event(status_event)

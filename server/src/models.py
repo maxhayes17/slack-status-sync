@@ -20,8 +20,6 @@ class User(BaseModel):
 
 
 # Google Calendar objects
-
-
 class CalendarColor(BaseModel):
     background: str
     foreground: str
@@ -47,6 +45,11 @@ class CalendarEvent(BaseModel):
     all_day: bool
 
 
+class Emoji(BaseModel):
+    name: str
+    path: str
+
+
 # Calendar event with Slack status
 class StatusEvent(BaseModel):
     id: str
@@ -56,7 +59,7 @@ class StatusEvent(BaseModel):
     start: datetime
     end: datetime
     status_text: str
-    status_emoji: Optional[str] = None
+    status_emoji: Optional[Emoji] = None
     # unix timestamp of end time
     status_expiration: float
 
@@ -67,4 +70,4 @@ class StatusEventRequest(BaseModel):
     start: datetime
     end: datetime
     statusText: str
-    statusEmoji: Optional[str] = None
+    statusEmoji: Optional[Emoji] = None

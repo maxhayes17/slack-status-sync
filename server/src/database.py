@@ -63,7 +63,7 @@ def put_status_event(event: StatusEvent) -> StatusEvent:
         "calendar_id": event.calendar_id,
         "event_id": event.event_id,
         "status_text": event.status_text,
-        "status_emoji": event.status_emoji,
+        "status_emoji": event.status_emoji.model_dump() if event.status_emoji else None,
         "status_expiration": event.status_expiration,
         "start": event.start.isoformat(),  # Store timestamps as strings
         "end": event.end.isoformat(),
@@ -73,5 +73,5 @@ def put_status_event(event: StatusEvent) -> StatusEvent:
 
 
 def get_status_events_by_user(user_id: str):
-    events_ref = db.collection("status_events").where("user_id", "==", user_id).stream()
-    return [StatusEvent(id=doc.id, **doc.to_dict()) for doc in events_ref]
+    events = db.collection("status_events").where("user_id", "==", user_id).stream()
+    return [StatusEvent(id=doc.id, **doc.to_dict()) for doc in events]
