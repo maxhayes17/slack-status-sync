@@ -55,7 +55,6 @@ export const AuthenticatedLayout = ({ user }: AuthenticatedLayoutProps) => {
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
 
-  const slackEnabled = true;
   return (
     <div>
       <div className="grid grid-cols-3 space-x-8 h-[85vh]">
@@ -64,7 +63,7 @@ export const AuthenticatedLayout = ({ user }: AuthenticatedLayoutProps) => {
             Welcome, {user.displayName}!
           </p>
           <div className="flex flex-row items-center justify-start space-x-3">
-            {slackEnabled && <ButtonAddToSlack user={user}/>}
+            {!user.slack_user_id && <ButtonAddToSlack />}
             <Button
               className="text-blue-600 font-bold italic text-sm"
               onClick={openModal}

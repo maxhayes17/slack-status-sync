@@ -2,6 +2,7 @@ export type User = {
   id: string;
   displayName: string;
   email: string;
+  slack_user_id?: string;
 };
 
 export type CalendarColor = {

@@ -43,12 +43,12 @@ FIREBASE_PROJECT_ID = os.environ.get("FIREBASE_PROJECT_ID")
 SLACK_CLIENT_ID = os.environ.get("SLACK_CLIENT_ID")
 SLACK_CLIENT_SECRET = os.environ.get("SLACK_CLIENT_SECRET")
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+SERVER_URL = os.environ.get("SERVER_URL")
+CLIENT_URL = os.environ.get("CLIENT_URL")
 
-
-SERVER_URL = "https://slack-status-syncer-server-801397650398.us-central1.run.app"
-CLIENT_URL = "https://slack-status-syncer-801397650398.us-central1.run.app"
-
+SLACK_OAUTH_BASE_URL = "https://slack.com/oauth/v2/authorize"
 SLACK_REDIRECT_URI = f"{SERVER_URL}/auth/slack/callback"
+SLACK_AUTH_SCOPES = "users.profile:read,users.profile:write,emoji:read"
 
 
 # Parses the "Authorization" header for a request, and verifies the token is valid with Firebase
@@ -99,6 +99,16 @@ async def root():
 # SLACK ROUTES
 ############################################
 # Auth with Slack
+@app.get("/auth/slack")
+async def auth_slack(auth: Authorization = Depends(verify_authorization)):
+    user = resolve_user(auth)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    auth_url = f"{SLACK_OAUTH_BASE_URL}?client_id={SLACK_CLIENT_ID}&user_scope={SLACK_AUTH_SCOPES}&redirect_uri={SLACK_REDIRECT_URI}&state={user.id}"
+    return {"url": auth_url}
+
+
 @app.get("/auth/slack/callback")
 async def auth_slack_callback(request: Request, code: str, state: str):
 

@@ -4,6 +4,19 @@ import { Calendar, User, CalendarEvent, StatusEvent } from "./types";
 export const STATUS_SYNCER_SERVER_URL =
   process.env.REACT_APP_STATUS_SYNCER_SERVER_URL;
 
+export const getSlackAuthentication = async () => {
+  try {
+    const resp = await fetch(`${STATUS_SYNCER_SERVER_URL}/auth/slack`, {
+      headers: await getAuthHeaders(),
+    });
+    const data = await resp.json();
+    window.location.href = data.url;
+  } catch (error) {
+    console.error("Error authenticating with Slack", error);
+    return null;
+  }
+};
+
 export const getUser = async (): Promise<User | null> => {
   try {
     const resp = await fetch(`${STATUS_SYNCER_SERVER_URL}/users/me`, {
@@ -15,6 +28,7 @@ export const getUser = async (): Promise<User | null> => {
       id: data.id,
       displayName: data.display_name,
       email: data.email,
+      slack_user_id: data.slack_user_id,
     } as User;
   } catch (error) {
     console.error("Error fetching user data:", error);

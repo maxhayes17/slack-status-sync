@@ -1,16 +1,11 @@
 import { Button } from "@headlessui/react";
-import { User } from "../utils/types";
-import { SLACK_OAUTH_URL } from "../utils/auth";
-
-type ButtonAddToSlackProps = {
-  user?: User;
-};
-
-export const ButtonAddToSlack = ({ user }: ButtonAddToSlackProps) => {
-  const SLACK_AUTH_URL = `${SLACK_OAUTH_URL}&state=${user?.id}`;
-
+import { getSlackAuthentication } from "../utils/utils";
+export const ButtonAddToSlack = () => {
   return (
-    <a href={SLACK_AUTH_URL} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg font-bold text-white bg-aubergine flex flex-row items-center hover:brightness-110">
+    <Button
+      onClick={getSlackAuthentication}
+      className="px-4 py-2 rounded-lg font-bold text-white bg-aubergine flex flex-row items-center hover:brightness-110"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="h-[20px] w-[20px] mr-[12px]"
@@ -34,6 +29,6 @@ export const ButtonAddToSlack = ({ user }: ButtonAddToSlackProps) => {
         ></path>
       </svg>
       Add to Slack
-    </a>
+    </Button>
   );
 };
