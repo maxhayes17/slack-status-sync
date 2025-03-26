@@ -295,7 +295,7 @@ async def post_status_event(
 @app.patch("/status-events/{status_event_id}", response_model=StatusEvent)
 async def patch_status_event(
     status_event_id: str,
-    req: StatusEventRequest,
+    req: StatusEvent,
     auth: Authorization = Depends(verify_authorization),
 ):
     try:

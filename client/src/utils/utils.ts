@@ -162,3 +162,45 @@ export const postStatusEvent = async (
     return null;
   }
 };
+
+export const patchStatusEvent = async (
+  statusEvent: StatusEvent
+): Promise<StatusEvent | null> => {
+  try {
+    const resp = await fetch(
+      `${STATUS_SYNCER_SERVER_URL}/status-events/${statusEvent.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(await getAuthHeaders()),
+        },
+        body: JSON.stringify(statusEvent),
+      }
+    );
+    const data = await resp.json();
+    return {
+      id: data.id,
+      calendar_id: data.calendar_id,
+      event_id: data.event_id,
+      start: data.start,
+      end: data.end,
+      status_text: data.status_text,
+      status_emoji: data.status_emoji,
+    } as StatusEvent;
+  } catch (error) {
+    console.error("Error posting status event:", error);
+    return null;
+  }
+};
+
+export const deleteStatusEvent = async (statusEvent: StatusEvent) => {
+  try {
+    await fetch(`${STATUS_SYNCER_SERVER_URL}/status-events/${statusEvent.id}`, {
+      method: "DELETE",
+      headers: await getAuthHeaders(),
+    });
+  } catch (error) {
+    console.error("Error deleting status event:", error);
+  }
+};
