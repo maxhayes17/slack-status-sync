@@ -45,7 +45,7 @@ export const getUser = async (): Promise<User | null> => {
     console.log(data);
     return {
       id: data.id,
-      displayName: data.display_name,
+      display_name: data.display_name,
       email: data.email,
       slack_user_id: data.slack_user_id,
     } as User;
@@ -96,13 +96,13 @@ export const getCalendarEvents = async (
     return data.map((event: any) => {
       return {
         id: event.id,
-        calendarId: event.calendar_id,
+        calendar_id: event.calendar_id,
         summary: event.summary,
         description: event.description,
         color: event.color,
         start: event.start,
         end: event.end,
-        allDay: event.all_day,
+        all_day: event.all_day,
       } as CalendarEvent;
     });
   } catch (error) {
@@ -121,12 +121,12 @@ export const getStatusEvents = async (): Promise<StatusEvent[] | null> => {
     return data.map((statusEvent: any) => {
       return {
         id: statusEvent.id,
-        calendarId: statusEvent.calendar_id,
-        eventId: statusEvent.event_id,
+        calendar_id: statusEvent.calendar_id,
+        event_id: statusEvent.event_id,
         start: statusEvent.start,
         end: statusEvent.end,
-        statusText: statusEvent.status_text,
-        statusEmoji: statusEvent.status_emoji,
+        status_text: statusEvent.status_text,
+        status_emoji: statusEvent.status_emoji,
       } as StatusEvent;
     });
   } catch (error) {
@@ -150,12 +150,12 @@ export const postStatusEvent = async (
     const data = await resp.json();
     return {
       id: data.id,
-      calendarId: data.calendar_id,
-      eventId: data.event_id,
+      calendar_id: data.calendar_id,
+      event_id: data.event_id,
       start: data.start,
       end: data.end,
-      statusText: data.status_text,
-      statusEmoji: data.status_emoji,
+      status_text: data.status_text,
+      status_emoji: data.status_emoji,
     } as StatusEvent;
   } catch (error) {
     console.error("Error posting status event:", error);

@@ -1,6 +1,6 @@
 export type User = {
   id: string;
-  displayName: string;
+  display_name: string;
   email: string;
   slack_user_id?: string;
 };
@@ -20,13 +20,13 @@ export type Calendar = {
 
 export type CalendarEvent = {
   id: string;
-  calendarId: string;
+  calendar_id: string;
   summary: string;
   description: string;
   color?: CalendarColor;
   start: string;
   end: string;
-  allDay: boolean;
+  all_day: boolean;
 };
 
 export type Emoji = {
@@ -36,10 +36,10 @@ export type Emoji = {
 
 export type StatusEvent = {
   id: string;
-  calendarId: string;
-  eventId: string;
+  calendar_id: string;
+  event_id: string;
   start: string;
   end: string;
-  statusText: string;
-  statusEmoji?: Emoji;
+  status_text: string;
+  status_emoji?: Emoji;
 };

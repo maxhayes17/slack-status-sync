@@ -16,7 +16,7 @@ def put_user(user: User) -> User:
     return User(id=new_user.id, **user_data)
 
 
-def patch_user(user: User) -> User:
+def update_user(user: User) -> User:
     # update user
     db_user = db.collection("users").document(user.id)
     user_data = {
@@ -72,6 +72,27 @@ def put_status_event(event: StatusEvent) -> StatusEvent:
     return StatusEvent(id=new_status_event.id, **status_event_data)
 
 
+def update_status_event(event: StatusEvent) -> StatusEvent:
+    db_event = db.collection("status_events").document(event.id)
+    status_event_data = {
+        "user_id": event.user_id,
+        "calendar_id": event.calendar_id,
+        "event_id": event.event_id,
+        "status_text": event.status_text,
+        "status_emoji": event.status_emoji.model_dump() if event.status_emoji else None,
+        "status_expiration": event.status_expiration,
+        "start": event.start.isoformat(),  # Store timestamps as strings
+        "end": event.end.isoformat(),
+    }
+    db_event.update(status_event_data)
+    return StatusEvent(id=event.id, **status_event_data)
+
+
 def get_status_events_by_user(user_id: str):
     events = db.collection("status_events").where("user_id", "==", user_id).stream()
     return [StatusEvent(id=doc.id, **doc.to_dict()) for doc in events]
+
+
+def get_status_event_by_id(id: str) -> StatusEvent:
+    event = db.collection("status_events").document(id).get()
+    return StatusEvent(id=event.id, **event.to_dict())

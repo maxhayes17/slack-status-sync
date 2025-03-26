@@ -19,9 +19,9 @@ export const CalendarEventBlock = ({
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
 
-  const handleStatusEventCreate = async (statusEvent: Partial<StatusEvent>) => {
-    console.log("Creating status event: ", statusEvent);
-    await postStatusEvent(statusEvent);
+  const handleStatusEventCreate = async (status_event: Partial<StatusEvent>) => {
+    console.log("Creating status event: ", status_event);
+    await postStatusEvent(status_event);
     closeModal();
   };
 
@@ -40,7 +40,7 @@ export const CalendarEventBlock = ({
         <p className="font-bold">{event.summary}</p>
         {event.start &&
           event.end &&
-          (event.allDay ? (
+          (event.all_day ? (
             <p className="text-sm">
               {formatDateTime(event.start, true)}{" "}
               <span className="ml-2 italic">(All day)</span>

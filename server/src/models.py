@@ -65,9 +65,9 @@ class StatusEvent(BaseModel):
 
 
 class StatusEventRequest(BaseModel):
-    calendarId: str
-    eventId: str
+    calendar_id: str
+    event_id: str
     start: datetime
     end: datetime
-    statusText: str
-    statusEmoji: Optional[Emoji] = None
+    status_text: str
+    status_emoji: Optional[Emoji] = None

@@ -2,7 +2,10 @@ import requests
 from fastapi import FastAPI, HTTPException, Header, Depends, Request
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer
 from google.oauth2 import id_token, credentials
+from google.cloud import tasks_v2
+from google.protobuf import timestamp_pb2
 from google.auth.transport import requests as google_requests
 from googleapiclient.discovery import build
 import os
@@ -20,8 +23,9 @@ from src.database import (
     get_user_by_id,
     get_user_by_firebase_user_id,
     put_user,
-    patch_user,
+    update_user,
     put_status_event,
+    get_status_event_by_id,
     get_status_events_by_user,
 )
 from datetime import datetime, timezone, timedelta
@@ -40,16 +44,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+tasks_client = tasks_v2.CloudTasksClient()
+
+SERVER_BASE_URL = os.environ.get("SERVER_BASE_URL")
+CLIENT_BASE_URL = os.environ.get("CLIENT_BASE_URL")
+
 FIREBASE_PROJECT_ID = os.environ.get("FIREBASE_PROJECT_ID")
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+
 SLACK_CLIENT_ID = os.environ.get("SLACK_CLIENT_ID")
 SLACK_CLIENT_SECRET = os.environ.get("SLACK_CLIENT_SECRET")
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-SERVER_URL = os.environ.get("SERVER_URL")
-CLIENT_URL = os.environ.get("CLIENT_URL")
-
 SLACK_OAUTH_BASE_URL = "https://slack.com/oauth/v2/authorize"
-SLACK_REDIRECT_URI = f"{SERVER_URL}/auth/slack/callback"
+SLACK_REDIRECT_URI = f"{SERVER_BASE_URL}/auth/slack/callback"
 SLACK_AUTH_SCOPES = "users.profile:read,users.profile:write,emoji:read"
+
+GOOGLE_CLOUD_PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT_ID")
+GOOGLE_CLOUD_LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION")
+GOOGLE_CLOUD_QUEUE_NAME = os.environ.get("GOOGLE_CLOUD_QUEUE_NAME")
+GOOGLE_CLOUD_SERVICE_ACCOUNT = os.environ.get("GOOGLE_CLOUD_SERVICE_ACCOUNT")
 
 
 # Parses the "Authorization" header for a request, and verifies the token is valid with Firebase
@@ -134,9 +146,9 @@ async def auth_slack_callback(request: Request, code: str, state: str):
     # Update user with slack user id and access token
     user.slack_user_id = data["authed_user"]["id"]
     user.slack_access_token = data["authed_user"]["access_token"]
-    patch_user(user)
+    update_user(user)
 
-    return RedirectResponse(url=f"{CLIENT_URL}?slack=success")
+    return RedirectResponse(url=f"{CLIENT_BASE_URL}?slack=success")
 
 
 @app.get("/slack/emojis")
@@ -199,6 +211,8 @@ async def get_user(auth: Authorization = Depends(verify_authorization)):
 ############################################
 # STATUS EVENT ROUTES
 ############################################
+
+
 @app.post("/status-events", response_model=StatusEvent)
 async def post_status_event(
     event: StatusEventRequest, auth: Authorization = Depends(verify_authorization)
@@ -211,15 +225,24 @@ async def post_status_event(
             # ID will be generated when event is created with firebase
             id="",
             user_id=user.id,
-            calendar_id=event.calendarId,
-            event_id=event.eventId,
+            calendar_id=event.calendar_id,
+            event_id=event.event_id,
             start=event.start,
             end=event.end,
-            status_text=event.statusText,
-            status_emoji=event.statusEmoji,
+            status_text=event.status_text,
+            status_emoji=event.status_emoji,
             status_expiration=event.end.timestamp(),  # Unix timestamp of end
         )
-        return put_status_event(status_event)
+
+        new_status_event = put_status_event(status_event)
+
+        # queue status event for syncing
+        schedule_time = new_status_event.start
+        task = create_task(new_status_event.id, schedule_time)
+        if not task:
+            raise HTTPException(status_code=500, detail="Error creating task")
+
+        return new_status_event
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error creating status event")
@@ -242,6 +265,8 @@ async def get_status_events(
 ############################################
 # CALENDAR ROUTES
 ############################################
+
+
 # GET /calendars
 # Returns a list of all Google Calendar objects for a user
 @app.get("/calendars", response_model=list[Calendar])
@@ -273,6 +298,8 @@ async def get_calendars(auth: Authorization = Depends(verify_authorization)):
 ############################################
 # CALENDAR EVENT ROUTES
 ############################################
+
+
 # GET /calendars/:calendarID/events
 # Returns a list of all events for a given Google Calendar
 @app.get("/calendars/{calendar_id}/events", response_model=list[CalendarEvent])
@@ -334,3 +361,109 @@ def parse_event_time(event_time: dict) -> datetime:
         # Event with specific time
         return datetime.fromisoformat(event_time["dateTime"])
     return None
+
+
+############################################
+# SYNCER (Google Tasks) ROUTES
+############################################
+
+
+# Create a Google Tasks API task, and add it to the current queue
+# when triggered (at the schedule_time), this task will hit the "/status-events/{event_id}/sync" endpoint
+# with the provided body
+def create_task(event_id: str, schedule_time: datetime):
+    # convert schedule time to utc
+    # if the timestamp is not tz-aware, make it tz-aware to utc
+    if schedule_time.tzinfo is None:
+        schedule_time = schedule_time.replace(tzinfo=timezone.utc)
+    # if the timestamp is tz-aware, convert it to utc
+    else:
+        schedule_time = schedule_time.astimezone(timezone.utc)
+
+    # convert timestamp to protobuf for gcloud
+    timestamp = timestamp_pb2.Timestamp()
+    timestamp.FromDatetime(schedule_time)
+
+    # define task payload
+    task = {
+        "http_request": {
+            "http_method": tasks_v2.HttpMethod.POST,
+            "url": f"{SERVER_BASE_URL}/status-events/{event_id}/sync",
+            # not necessarily needed since this request has no body, but good to have
+            "headers": {"Content-Type": "application/json"},
+            "oidc_token": {
+                "service_account_email": GOOGLE_CLOUD_SERVICE_ACCOUNT,
+            },
+        },
+        "schedule_time": timestamp,
+    }
+    # configure path for queue
+    path = tasks_client.queue_path(
+        GOOGLE_CLOUD_PROJECT_ID, GOOGLE_CLOUD_LOCATION, GOOGLE_CLOUD_QUEUE_NAME
+    )
+    return tasks_client.create_task(tasks_v2.CreateTaskRequest(parent=path, task=task))
+
+
+def update_slack_status(event: StatusEvent):
+    try:
+        # resolve user from auth
+        user = get_user_by_id(event.user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        token = user.slack_access_token
+        if not token:
+            raise HTTPException(
+                status_code=400, detail="User has not authenticated with Slack"
+            )
+
+        path = "https://slack.com/api/users.profile.set"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        }
+        data = {
+            "profile": {
+                "status_text": event.status_text,
+                "status_emoji": event.emoji.name,
+                "status_expiration": event.status_expiration,
+            }
+        }
+        response = requests.post(path, headers=headers, json=data)
+        data = response.json()
+
+        if not data.get("ok"):
+            raise HTTPException(
+                status_code=400, detail="Failed updating status in Slack"
+            )
+
+        return data
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Error updating Slack status")
+
+
+# needs work, but basic check for an auth token
+auth_scheme = HTTPBearer()
+
+
+@app.post("/status-events/{event_id}/sync")
+async def sync_status_event(event_id: str, token: str = Depends(auth_scheme)):
+    try:
+        if not token:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        # get status event by path param
+        status_event = get_status_event_by_id(event_id)
+        if not status_event:
+            raise HTTPException(status_code=404, detail="Status event not found")
+
+        # update slack status with status event
+        response = update_slack_status(status_event)
+        if not response:
+            raise HTTPException(status_code=500, detail="Error syncing status event")
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Error syncing status event")

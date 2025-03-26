@@ -25,8 +25,8 @@ export const StatusEventCreateForm = ({
   onCancel,
 }: StatusEventCreateFormProps) => {
   const INITIAL_STATUS_EVENT: Partial<StatusEvent> = {
-    calendarId: event.calendarId,
-    eventId: event.id,
+    calendar_id: event.calendar_id,
+    event_id: event.id,
     start: event.start,
     end: event.end,
   };
@@ -48,7 +48,7 @@ export const StatusEventCreateForm = ({
     getSlackEmojiData();
   }, []);
 
-  const isValid = statusEvent.statusText;
+  const isValid = statusEvent.status_text;
 
   return (
     <Fieldset className="grid grid-cols-3 gap-4">
@@ -59,9 +59,9 @@ export const StatusEventCreateForm = ({
         <Label className="ml-1 font-bold">* Status Text</Label>
         <Input
           className="w-full py-2 rounded-lg border-none bg-neutral-100 pr-8 pl-3 text-md focus:outline-none mt-1"
-          name="statusText"
+          name="status_text"
           placeholder={event.summary}
-          onChange={(e) => handleChange("statusText", e.target.value)}
+          onChange={(e) => handleChange("status_text", e.target.value)}
         />
       </Field>
       {slackEmojis && (
@@ -70,7 +70,7 @@ export const StatusEventCreateForm = ({
           <div className="mt-1">
             <EmojiSelect
               emojis={slackEmojis}
-              onSelect={(emoji) => handleChange("statusEmoji", emoji)}
+              onSelect={(emoji) => handleChange("status_emoji", emoji)}
             />
           </div>
         </Field>

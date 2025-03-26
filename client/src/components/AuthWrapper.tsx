@@ -17,7 +17,7 @@ export const AuthWrapper = () => {
         const userData = await getUser();
         setUser({          
           id: userData?.id ?? "",
-          displayName: userData?.displayName ?? "",
+          display_name: userData?.display_name ?? "",
           email: userData?.email ?? "",
           slack_user_id: userData?.slack_user_id ?? "",
         });
@@ -41,7 +41,7 @@ export const AuthWrapper = () => {
             const user = await getUser();
             setUser({
               id: user?.id ?? "",
-              displayName: user?.displayName ?? "",
+              display_name: user?.display_name ?? "",
               email: user?.email ?? "",
               slack_user_id: user?.slack_user_id ?? "",
             });

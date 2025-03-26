@@ -60,7 +60,7 @@ export const AuthenticatedLayout = ({ user }: AuthenticatedLayoutProps) => {
       <div className="grid grid-cols-3 space-x-8 h-[85vh]">
         <div className="col-span-1 flex flex-col space-y-6 text-left">
           <p className="text-4xl font-extrabold">
-            Welcome, {user.displayName}!
+            Welcome, {user.display_name}!
           </p>
           <div className="flex flex-row items-center justify-start space-x-3">
             {user.slack_user_id ? (
