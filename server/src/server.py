@@ -30,22 +30,6 @@ from src.database import (
 )
 from datetime import datetime, timezone, timedelta
 
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-    "https://slack-status-syncer-801397650398.us-central1.run.app",
-]
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-tasks_client = tasks_v2.CloudTasksClient()
-
 SERVER_BASE_URL = os.environ.get("SERVER_BASE_URL")
 CLIENT_BASE_URL = os.environ.get("CLIENT_BASE_URL")
 
@@ -62,6 +46,22 @@ GOOGLE_CLOUD_PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT_ID")
 GOOGLE_CLOUD_LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION")
 GOOGLE_CLOUD_QUEUE_NAME = os.environ.get("GOOGLE_CLOUD_QUEUE_NAME")
 GOOGLE_CLOUD_SERVICE_ACCOUNT = os.environ.get("GOOGLE_CLOUD_SERVICE_ACCOUNT")
+
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+    CLIENT_BASE_URL,
+]
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+tasks_client = tasks_v2.CloudTasksClient()
 
 
 # Parses the "Authorization" header for a request, and verifies the token is valid with Firebase
@@ -425,7 +425,7 @@ def update_slack_status(event: StatusEvent):
         data = {
             "profile": {
                 "status_text": event.status_text,
-                "status_emoji": event.emoji.name,
+                "status_emoji": event.status_emoji.name if event.status_emoji else "",
                 "status_expiration": event.status_expiration,
             }
         }
