@@ -429,10 +429,15 @@ def update_slack_status(event: StatusEvent):
                 "status_expiration": event.status_expiration,
             }
         }
+        print(path)
+        print(headers)
+        print(data)
         response = requests.post(path, headers=headers, json=data)
         data = response.json()
+        print(data)
 
         if not data.get("ok"):
+            print(data)
             raise HTTPException(
                 status_code=400, detail="Failed updating status in Slack"
             )
