@@ -420,21 +420,19 @@ def update_slack_status(event: StatusEvent):
         path = "https://slack.com/api/users.profile.set"
         headers = {
             "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
+            "Content-Type": "application/json; charset=utf-8",
         }
         data = {
             "profile": {
                 "status_text": event.status_text,
-                "status_emoji": event.status_emoji.name if event.status_emoji else "",
+                "status_emoji": (
+                    f":{event.status_emoji.name}:" if event.status_emoji else ""
+                ),
                 "status_expiration": event.status_expiration,
             }
         }
-        print(path)
-        print(headers)
-        print(data)
         response = requests.post(path, headers=headers, json=data)
         data = response.json()
-        print(data)
 
         if not data.get("ok"):
             print(data)
