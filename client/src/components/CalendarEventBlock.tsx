@@ -4,7 +4,6 @@ import { Modal } from "./Modal";
 import { StatusEventCreateForm } from "./StatusEventCreateForm";
 import { formatDateTime } from "../utils/date";
 import { postStatusEvent } from "../utils/utils";
-import { Button } from "@headlessui/react";
 import { clsx } from "clsx";
 
 type CalendarEventBlockProps = {
@@ -32,9 +31,10 @@ export const CalendarEventBlock = ({
         color: color ? color.foreground : undefined,
       }}
       className={clsx(
-        "group flex flex-row justify-between p-2 rounded-lg w-2/3",
+        "group flex flex-row justify-between p-2 rounded-lg w-2/3 hover:cursor-pointer",
         color ? "hover:bg-opacity-70" : "bg-neutral-100 hover:bg-neutral-200"
       )}
+      onClick={openModal}
     >
       <div className="flex flex-col">
         <p className="font-bold">{event.summary}</p>
@@ -78,14 +78,6 @@ export const CalendarEventBlock = ({
             />
           </div>
         </Modal>
-      </div>
-      <div className="flex flex-col my-auto">
-        <Button
-          className="px-2 py-1 bg-neutral-100 rounded-lg text-blue-600 font-bold invisible group-hover:visible hover:text-blue-500"
-          onClick={openModal}
-        >
-          Add Status
-        </Button>
       </div>
     </div>
   );

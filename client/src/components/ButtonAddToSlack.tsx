@@ -1,8 +1,13 @@
 import { Button } from "@headlessui/react";
 import { getSlackAuthentication } from "../utils/utils";
-export const ButtonAddToSlack = () => {
+
+type ButtonAddToSlackProps = {
+  isDisabled?: boolean;
+};
+export const ButtonAddToSlack = ({ isDisabled }: ButtonAddToSlackProps) => {
   return (
     <Button
+      disabled={isDisabled ?? false}
       onClick={getSlackAuthentication}
       className="px-4 py-2 rounded-lg font-bold text-white bg-aubergine flex flex-row items-center hover:brightness-110"
     >

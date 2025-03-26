@@ -36,6 +36,7 @@ export type Emoji = {
 
 export type StatusEvent = {
   id: string;
+  user_id: string;
   calendar_id: string;
   event_id: string;
   start: string;

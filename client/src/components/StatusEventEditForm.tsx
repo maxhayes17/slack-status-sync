@@ -4,7 +4,6 @@ import {
   Fieldset,
   Input,
   Label,
-  Legend,
 } from "@headlessui/react";
 import { Emoji } from "../utils/types";
 import { formatDateTime } from "../utils/date";
@@ -26,7 +25,7 @@ export const StatusEventEditForm = ({
   onCancel,
   onDelete,
 }: StatusEventEditFormProps) => {
-    
+
   const [updatedStatusEvent, setUpdatedStatusEvent] =
     useState<StatusEvent>(statusEvent);
 
@@ -67,6 +66,7 @@ export const StatusEventEditForm = ({
             <EmojiSelect
               emojis={slackEmojis}
               onSelect={(emoji) => handleChange("status_emoji", emoji)}
+              initialValue={statusEvent.status_emoji}
             />
           </div>
         </Field>

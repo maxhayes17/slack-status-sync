@@ -20,7 +20,7 @@ export const ModalHowItWorks = ({ isOpen, onClose }: ModalHowItWorksProps) => {
             <p className="flex flex-row items-center">
               Add the app to your Slack workspace by clicking{" "}
               <span className="ml-2">
-                <ButtonAddToSlack />
+                <ButtonAddToSlack isDisabled={true} />
               </span>
             </p>
             <p className="text-sm text-neutral-600 italic">
@@ -30,10 +30,7 @@ export const ModalHowItWorks = ({ isOpen, onClose }: ModalHowItWorksProps) => {
           </li>
           <li className="flex flex-col space-y-2">
             <p>
-              Choose an event from one of your calendars, and click{" "}
-              <span className="ml-1">
-                <ButtonPrimary label="Add Status" />
-              </span>
+              Click on event from one of your calendars to create a status event
             </p>
             <p className="text-sm text-neutral-600 italic">
               **Only one-time events are supported for status syncs. If you

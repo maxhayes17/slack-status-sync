@@ -121,12 +121,14 @@ export const getStatusEvents = async (): Promise<StatusEvent[] | null> => {
     return data.map((statusEvent: any) => {
       return {
         id: statusEvent.id,
+        user_id: statusEvent.user_id,
         calendar_id: statusEvent.calendar_id,
         event_id: statusEvent.event_id,
         start: statusEvent.start,
         end: statusEvent.end,
         status_text: statusEvent.status_text,
         status_emoji: statusEvent.status_emoji,
+        status_expiration: statusEvent.status_expiration,
       } as StatusEvent;
     });
   } catch (error) {
@@ -150,12 +152,14 @@ export const postStatusEvent = async (
     const data = await resp.json();
     return {
       id: data.id,
+      user_id: data.user_id,
       calendar_id: data.calendar_id,
       event_id: data.event_id,
       start: data.start,
       end: data.end,
       status_text: data.status_text,
       status_emoji: data.status_emoji,
+      status_expiration: data.status_expiration,
     } as StatusEvent;
   } catch (error) {
     console.error("Error posting status event:", error);
@@ -181,12 +185,14 @@ export const patchStatusEvent = async (
     const data = await resp.json();
     return {
       id: data.id,
+      user_id: data.user_id,
       calendar_id: data.calendar_id,
       event_id: data.event_id,
       start: data.start,
       end: data.end,
       status_text: data.status_text,
       status_emoji: data.status_emoji,
+      status_expiration: data.status_expiration,
     } as StatusEvent;
   } catch (error) {
     console.error("Error posting status event:", error);

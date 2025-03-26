@@ -11,10 +11,11 @@ import { Emoji } from "../utils/types";
 type EmojiSelectProps = {
   emojis: Emoji[];
   onSelect: (value: Emoji) => void;
+  initialValue?: Emoji;
 };
 
-export const EmojiSelect = ({ emojis, onSelect }: EmojiSelectProps) => {
-  const [selectedEmoji, setSelectedEmoji] = useState<Emoji>(emojis[0]);
+export const EmojiSelect = ({ emojis, onSelect, initialValue }: EmojiSelectProps) => {
+  const [selectedEmoji, setSelectedEmoji] = useState<Emoji>(initialValue ?? emojis[0]);
   const [query, setQuery] = useState("");
 
   const filteredEmojis =
