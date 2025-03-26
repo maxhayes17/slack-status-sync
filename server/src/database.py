@@ -1,4 +1,4 @@
-from src.models import User, StatusEvent
+from src.models import User, StatusEvent, StatusSync
 from google.cloud import firestore
 
 db = firestore.Client()
@@ -39,7 +39,7 @@ def get_user_by_id(user_id: str) -> User:
 def get_user_by_email(email: str) -> User:
     users = db.collection("users").where("email", "==", email).limit(1).stream()
     for doc in users:
-        return User(id=doc.id, **doc.to_dict())  # Firestore returns a dict
+        return User(id=doc.id, **doc.to_dict())
     return None
 
 
@@ -52,7 +52,7 @@ def get_user_by_firebase_user_id(firebase_user_id: str) -> User:
         .stream()
     )
     for doc in users:
-        return User(id=doc.id, **doc.to_dict())  # Firestore returns a dict
+        return User(id=doc.id, **doc.to_dict())
     return None
 
 
@@ -96,3 +96,35 @@ def get_status_events_by_user(user_id: str):
 def get_status_event_by_id(id: str) -> StatusEvent:
     event = db.collection("status_events").document(id).get()
     return StatusEvent(id=event.id, **event.to_dict())
+
+
+def delete_status_event(id: str):
+    db.collection("status_events").document(id).delete()
+    return True
+
+
+def put_status_sync(status_sync: StatusSync) -> StatusSync:
+    new_status_sync = db.collection("status_syncs").document()
+    status_sync_data = {
+        "task_id": status_sync.task_id,
+        "status_event_id": status_sync.status_event_id,
+        "user_id": status_sync.user_id,
+        "scheduled_time": status_sync.scheduled_time.isoformat(),
+        "status": status_sync.status,
+    }
+    new_status_sync.set(status_sync_data)
+    return StatusSync(id=new_status_sync.id, **status_sync_data)
+
+
+def get_status_sync_by_task_id(task_id: str):
+    status_syncs = (
+        db.collection("status_syncs").where("task_id", "==", task_id).limit(1).stream()
+    )
+    for doc in status_syncs:
+        return StatusSync(id=doc.id, **doc.to_dict())
+    return None
+
+
+def delete_status_sync(id: str):
+    db.collection("status_syncs").document(id).delete()
+    return True

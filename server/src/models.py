@@ -71,3 +71,11 @@ class StatusEventRequest(BaseModel):
     end: datetime
     status_text: str
     status_emoji: Optional[Emoji] = None
+
+
+class StatusSync(BaseModel):
+    task_id: str
+    status_event_id: str
+    user_id: str
+    scheduled_time: datetime
+    status: str
