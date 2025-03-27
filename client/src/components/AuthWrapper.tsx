@@ -1,50 +1,37 @@
 import { useEffect, useState } from "react";
 import { auth, googleProvider, signInWithPopup, signOut, GoogleAuthProvider} from "../utils/auth";
-import { UnauthenticatedLayout } from "./UnauthenticatedLayout";
-import { AuthenticatedLayout } from "./AuthenticatedLayout";
-import { User } from "../utils/types";
+import { UnauthenticatedHomePage } from "./UnauthenticatedHomePage";
+import { AuthenticatedHomePage } from "./AuthenticatedHomePage";
 import { ButtonPrimary } from "./ButtonPrimary";
 import { GOOGLE_AUTH_STORAGE_KEY, storeToken } from "../utils/storage";
 import { UserCredential } from "firebase/auth";
-import { getUser } from "../utils/utils";
 
 export const AuthWrapper = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        const userData = await getUser();
-        setUser({          
-          id: userData?.id ?? "",
-          display_name: userData?.display_name ?? "",
-          email: userData?.email ?? "",
-          slack_user_id: userData?.slack_user_id ?? "",
-        });
+        setIsAuthenticated(true);
       } else {
-        setUser(null);
+        setIsAuthenticated(false);
       }
     });
     return () => unsubscribe();
   }, []);
 
 
-
   const handleSignIn = async () => {
+    // if user is already auth'd, don't need to re-sign in
+    if (isAuthenticated) {
+      return;
+    }
     signInWithPopup(auth, googleProvider)
         .then(async (resp: UserCredential) => {
           const credential = GoogleAuthProvider.credentialFromResult(resp);
           storeToken(GOOGLE_AUTH_STORAGE_KEY, credential?.accessToken || "");
-
-          const userData = resp.user;
-          if (userData) {
-            const user = await getUser();
-            setUser({
-              id: user?.id ?? "",
-              display_name: user?.display_name ?? "",
-              email: user?.email ?? "",
-              slack_user_id: user?.slack_user_id ?? "",
-            });
+          if (resp.user) {
+            setIsAuthenticated(true);
           }
         })
         .catch((err: any) => {
@@ -57,7 +44,7 @@ export const AuthWrapper = () => {
     signOut(auth)
       .then((resp: any) => {
         // reset user
-        setUser(null);
+        setIsAuthenticated(false);
       })
       .catch((err: any) => {
         console.log(err);
@@ -67,14 +54,14 @@ export const AuthWrapper = () => {
   return (
     <div className="flex flex-col max-h-full">
       <div className="left-0 top-0 z-10 p-4 flex w-full shrink-0 items-center justify-start space-x-2 h-16 bg-neutral-200">
-        {user ? (
+        {isAuthenticated ? (
             <ButtonPrimary label="Sign Out" onClick={handleSignOut}/>
         ) : (
             <ButtonPrimary label="Sign in with Google" onClick={handleSignIn} />
         )}
       </div>
       <div className="mx-auto w-full p-8 pt-8">
-        {user ? <AuthenticatedLayout user={user} /> : <UnauthenticatedLayout />}
+        {isAuthenticated ? <AuthenticatedHomePage /> : <UnauthenticatedHomePage />}
       </div>
     </div>
   );

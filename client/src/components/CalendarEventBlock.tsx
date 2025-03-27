@@ -22,6 +22,7 @@ export const CalendarEventBlock = ({
     console.log("Creating status event: ", status_event);
     await postStatusEvent(status_event);
     closeModal();
+    window.location.reload();
   };
 
   return (

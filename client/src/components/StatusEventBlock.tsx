@@ -17,11 +17,13 @@ export const StatusEventBlock = ({ event }: StatusEventBlockProps) => {
     console.log("Creating status event: ", statusEvent);
     await patchStatusEvent(statusEvent);
     closeModal();
+    window.location.reload();
   };
   const handleStatusEventDelete = async (statusEvent: StatusEvent) => {
     console.log("Deleting status event: ", statusEvent);
     await deleteStatusEvent(statusEvent);
     closeModal();
+    window.location.reload();
   };
 
   return (
