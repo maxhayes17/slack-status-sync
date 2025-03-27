@@ -57,7 +57,10 @@ export const AuthenticatedHomePage = () => {
   };
   const getCalendarEventsData = async (calendarId: string) => {
     const resp = await getCalendarEvents(calendarId);
-    setCalendarEvents(resp);
+    const sorted = resp?.sort((a, b) => {
+      return new Date(a.start).getTime() - new Date(b.start).getTime();
+    });
+    setCalendarEvents(sorted ?? null);
   };
   const getStatusEventsData = async () => {
     const resp = await getStatusEvents();
@@ -106,7 +109,7 @@ export const AuthenticatedHomePage = () => {
                 (?) How it works
               </Button>
             </div>
-            <div className="flex flex-col pt-4 space-y-4">
+            <div className="flex flex-col pt-4 space-y-6">
               {calendars && calendars.length > 0 && (
                 <CalendarSelect
                   calendars={calendars}
@@ -115,10 +118,7 @@ export const AuthenticatedHomePage = () => {
                 />
               )}
               {statusEvents && statusEvents.length > 0 && (
-                <div className="flex flex-col space-y-2">
-                  <p className="font-bold pl-1">Your Upcoming Status Events</p>
-                  <StatusEventsList events={statusEvents} />
-                </div>
+                <StatusEventsList events={statusEvents} />
               )}
             </div>
           </div>
