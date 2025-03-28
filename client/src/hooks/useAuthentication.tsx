@@ -56,18 +56,18 @@ export const AuthenticationProvider = ({
     if (lastActiveTime && currentTime.isAfter(expirationTime)) {
       // Session has expired, sign out the user
       handleSessionTimeout();
-    } else {
-      // Update the last active time
-      localStorage.setItem(
-        LAST_ACTIVE_TIME_STORAGE_KEY,
-        currentTime.toISOString()
-      );
     }
+    // Update the last active time
+    localStorage.setItem(
+      LAST_ACTIVE_TIME_STORAGE_KEY,
+      currentTime.toISOString()
+    );
+
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         try {
-          // Get fresh ID token for user
-          await user.getIdToken(true);
+          // wait for the token to be refreshed
+          await user.getIdToken();
 
           setAuthenticationState((prev) => ({
             ...prev,
@@ -126,7 +126,6 @@ export const AuthenticationProvider = ({
   };
 
   const handleSessionTimeout = async () => {
-    // Handle session timeout logic here
     setAuthenticationState((prev) => ({
       ...prev,
       isAuthenticated: false,
