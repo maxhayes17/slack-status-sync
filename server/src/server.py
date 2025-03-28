@@ -191,7 +191,7 @@ async def get_slack_emojis(auth: Authorization = Depends(verify_authorization)):
                 status_code=400, detail="User has not authenticated with Slack"
             )
 
-        path = "https://slack.com/api/emoji.list"
+        path = "https://slack.com/api/emoji.list?include_categories=True&pretty=1"
         headers = {"Authorization": f"Bearer {token}"}
         response = requests.get(path, headers=headers)
         data = response.json()
@@ -201,12 +201,20 @@ async def get_slack_emojis(auth: Authorization = Depends(verify_authorization)):
                 status_code=400, detail="Failed retrieving emojis from Slack"
             )
 
-        return [
+        slack_emojis = [
             Emoji(name=k, path=v)
             for k, v in data["emoji"].items()
             # some emojis are aliases for other emojis... ignore these for now
             if v.startswith("http")
         ]
+        base_emojis = []
+        for category in data["categories"]:
+            for emoji_name in category["emoji_names"]:
+                emoji = Emoji(name=emoji_name)
+                base_emojis.append(emoji)
+
+        return slack_emojis + base_emojis
+
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error retrieving slack emojis")

@@ -19,7 +19,9 @@ const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope("https://www.googleapis.com/auth/calendar.readonly");
 
 const getAuthHeaders = async () => {
-  const idToken = await auth.currentUser?.getIdToken();
+  const user = auth.currentUser;
+  const idToken = await user?.getIdToken(true);
+
   const accessToken = getItem(GOOGLE_AUTH_STORAGE_KEY);
   return {
     Authorization: `Bearer ${idToken}`,

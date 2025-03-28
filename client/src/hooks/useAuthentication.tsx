@@ -65,11 +65,22 @@ export const AuthenticationProvider = ({
     }
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        setAuthenticationState((prev) => ({
-          ...prev,
-          isAuthenticated: true,
-          hasAuthenticationBeenChecked: true,
-        }));
+        try {
+          // Get fresh ID token for user
+          await user.getIdToken(true);
+
+          setAuthenticationState((prev) => ({
+            ...prev,
+            isAuthenticated: true,
+            hasAuthenticationBeenChecked: true,
+          }));
+        } catch (error) {
+          console.error(
+            "Authentication token has expired; Signing out...",
+            error
+          );
+          handleSessionTimeout();
+        }
       } else {
         await signOut(auth);
         setAuthenticationState((prev) => ({
@@ -135,7 +146,7 @@ export const AuthenticationProvider = ({
         children
       ) : (
         <div className="flex justify-center items-center h-screen">
-            <LoadingSpinner />
+          <LoadingSpinner />
         </div>
       )}
     </AuthenticationContext.Provider>

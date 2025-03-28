@@ -40,7 +40,10 @@ export const StatusEventCreateForm = ({
     setSlackEmojis(resp);
   };
 
-  const handleChange = (key: keyof StatusEvent, value: string | Emoji) => {
+  const handleChange = (
+    key: keyof StatusEvent,
+    value: string | Emoji | undefined
+  ) => {
     setStatusEvent({ ...statusEvent, [key]: value });
   };
 
@@ -64,17 +67,24 @@ export const StatusEventCreateForm = ({
           onChange={(e) => handleChange("status_text", e.target.value)}
         />
       </Field>
-      {slackEmojis && (
-        <Field className={"col-span-1"}>
-          <Label className="ml-1 font-bold">Status Emoji</Label>
+      <Field className={"col-span-1"}>
+        <Label className="ml-1 font-bold">Status Emoji</Label>
+        {slackEmojis ? (
           <div className="mt-1">
             <EmojiSelect
               emojis={slackEmojis}
               onSelect={(emoji) => handleChange("status_emoji", emoji)}
             />
           </div>
-        </Field>
-      )}
+        ) : (
+          <Input
+            className="w-full py-2 rounded-lg border-none bg-neutral-100 pr-8 pl-3 text-md focus:outline-none mt-1"
+            name="status_emoji"
+            placeholder="Loading..."
+            disabled
+          />
+        )}
+      </Field>
       {statusEvent.start && statusEvent.end && (
         <Label className="col-span-full ml-1 italic">
           From {formatDateTime(statusEvent.start, false)} to{" "}

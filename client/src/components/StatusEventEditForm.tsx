@@ -1,10 +1,4 @@
-import {
-  Button,
-  Field,
-  Fieldset,
-  Input,
-  Label,
-} from "@headlessui/react";
+import { Button, Field, Fieldset, Input, Label } from "@headlessui/react";
 import { Emoji } from "../utils/types";
 import { formatDateTime } from "../utils/date";
 import { StatusEvent } from "../utils/types";
@@ -25,7 +19,6 @@ export const StatusEventEditForm = ({
   onCancel,
   onDelete,
 }: StatusEventEditFormProps) => {
-
   const [updatedStatusEvent, setUpdatedStatusEvent] =
     useState<StatusEvent>(statusEvent);
 
@@ -35,7 +28,10 @@ export const StatusEventEditForm = ({
     setSlackEmojis(resp);
   };
 
-  const handleChange = (key: keyof StatusEvent, value: string | Emoji) => {
+  const handleChange = (
+    key: keyof StatusEvent,
+    value: string | Emoji | undefined
+  ) => {
     setUpdatedStatusEvent({ ...updatedStatusEvent, [key]: value });
   };
 
@@ -59,9 +55,9 @@ export const StatusEventEditForm = ({
           onChange={(e) => handleChange("status_text", e.target.value)}
         />
       </Field>
-      {slackEmojis && (
-        <Field className={"col-span-1"}>
-          <Label className="ml-1 font-bold">Status Emoji</Label>
+      <Field className={"col-span-1"}>
+        <Label className="ml-1 font-bold">Status Emoji</Label>
+        {slackEmojis ? (
           <div className="mt-1">
             <EmojiSelect
               emojis={slackEmojis}
@@ -69,8 +65,15 @@ export const StatusEventEditForm = ({
               initialValue={statusEvent.status_emoji}
             />
           </div>
-        </Field>
-      )}
+        ) : (
+          <Input
+            className="w-full py-2 rounded-lg border-none bg-neutral-100 pr-8 pl-3 text-md focus:outline-none mt-1"
+            name="status_emoji"
+            placeholder="Loading..."
+            disabled
+          />
+        )}
+      </Field>
       {statusEvent.start && statusEvent.end && (
         <Label className="col-span-full ml-1 italic">
           From {formatDateTime(statusEvent.start, false)} to{" "}

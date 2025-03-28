@@ -31,7 +31,7 @@ export type CalendarEvent = {
 
 export type Emoji = {
   name: string;
-  path: string;
+  path?: string;
 };
 
 export type StatusEvent = {

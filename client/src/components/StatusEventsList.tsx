@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { StatusEvent } from "../utils/types";
 import { StatusEventBlock } from "./StatusEventBlock";
 
@@ -14,9 +15,9 @@ export const StatusEventsList = ({ events }: StatusEventsListProps) => {
   });
 
   return (
-    <div className="flex flex-col space-y-6">
+    <div className="flex flex-col space-y-4">
       {upcomingEvents.length > 0 && (
-        <div className="flex flex-col space-y-1">
+        <div className={clsx("flex flex-col space-y-2 max-h-44 overflow-y-auto", {"max-h-80": pastEvents.length < 1})}>
           <p className="font-bold pl-1">Upcoming Status Events</p>
           {upcomingEvents.map((event) => (
             <StatusEventBlock event={event} key={event.id} />
@@ -24,7 +25,7 @@ export const StatusEventsList = ({ events }: StatusEventsListProps) => {
         </div>
       )}
       {pastEvents.length > 0 && (
-        <div className="flex flex-col space-y-1">
+        <div className={clsx("flex flex-col space-y-2 max-h-44 overflow-y-auto", {"max-h-80": upcomingEvents.length < 1})}>
           <p className="font-bold pl-1">Past Status Events</p>
           {pastEvents.map((event) => (
             <StatusEventBlock event={event} key={event.id} />

@@ -47,7 +47,7 @@ class CalendarEvent(BaseModel):
 
 class Emoji(BaseModel):
     name: str
-    path: str
+    path: Optional[str] = None
 
 
 # Calendar event with Slack status

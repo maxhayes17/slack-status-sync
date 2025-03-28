@@ -4,6 +4,7 @@ import { StatusEvent } from "../utils/types";
 import { deleteStatusEvent, patchStatusEvent } from "../utils/utils";
 import { StatusEventEditForm } from "./StatusEventEditForm";
 import { Modal } from "./Modal";
+import { getEmojiFromName } from "../utils/emoji";
 
 type StatusEventBlockProps = {
   event: StatusEvent;
@@ -31,10 +32,19 @@ export const StatusEventBlock = ({ event }: StatusEventBlockProps) => {
       className="flex flex-col p-2 space-y-1 rounded-lg bg-neutral-100 hover:cursor-pointer hover:bg-neutral-200 mr-2"
       onClick={openModal}
     >
-      <div className="flex flex-row space-x-2 items-center">
-        {event.status_emoji && (
-          <img src={event.status_emoji.path} alt="Emoji" className="w-6 h-6" />
-        )}
+      <div className="flex flex-row space-x-1 items-center">
+        {event.status_emoji &&
+          (event.status_emoji.path ? (
+            <img
+              src={event.status_emoji.path}
+              alt="Emoji"
+              className="w-6 h-6"
+            />
+          ) : (
+            <span className="w-6 h-6 flex items-center justify-center text-xl">
+              {getEmojiFromName(event.status_emoji.name)}
+            </span>
+          ))}
         <p className="font-bold">{event.status_text}</p>
       </div>
       <p className="text-sm">

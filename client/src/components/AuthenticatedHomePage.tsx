@@ -122,7 +122,7 @@ export const AuthenticatedHomePage = () => {
               )}
             </div>
           </div>
-          <div className="col-span-2 overflow-y-scroll pr-4">
+          <div className="col-span-2 overflow-y-auto pr-4">
             {currentCalendar && calendarEvents && (
               <CalendarEventsList
                 events={calendarEvents}

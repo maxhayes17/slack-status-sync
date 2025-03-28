@@ -1,5 +1,6 @@
 export const GOOGLE_AUTH_STORAGE_KEY = "slack-status-sync-google-auth";
-export const LAST_ACTIVE_TIME_STORAGE_KEY = "last-active-time";
+export const LAST_ACTIVE_TIME_STORAGE_KEY =
+  "slack-status-sync-last-active-time";
 
 export function storeItem(key: string, token: string) {
   localStorage.setItem(key, token);

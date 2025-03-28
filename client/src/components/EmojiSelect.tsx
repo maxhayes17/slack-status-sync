@@ -7,10 +7,12 @@ import {
 } from "@headlessui/react";
 import { useState } from "react";
 import { Emoji } from "../utils/types";
+import { getEmojiFromName } from "../utils/emoji";
+import clsx from "clsx";
 
 type EmojiSelectProps = {
   emojis: Emoji[];
-  onSelect: (value: Emoji) => void;
+  onSelect: (value: Emoji | undefined) => void;
   initialValue?: Emoji;
 };
 
@@ -19,41 +21,52 @@ export const EmojiSelect = ({
   onSelect,
   initialValue,
 }: EmojiSelectProps) => {
-  const [selectedEmoji, setSelectedEmoji] = useState<Emoji>(
-    initialValue ?? emojis[0]
+  const [selectedEmoji, setSelectedEmoji] = useState<Emoji | undefined>(
+    initialValue ?? undefined
   );
   const [query, setQuery] = useState("");
 
+  // Only render top 20 emojis at a time
   const filteredEmojis =
     query === ""
-      ? emojis
-      : emojis.filter((emoji) => {
-          return emoji.name.toLowerCase().includes(query.toLowerCase());
-        });
+      ? emojis.slice(0, 20)
+      : emojis
+          .filter((emoji) => {
+            return emoji.name.toLowerCase().includes(query.toLowerCase());
+          })
+          .slice(0, 20);
 
   return (
     <div className="max-h-30">
       <Combobox
         value={selectedEmoji}
         onChange={(value) => {
-          setSelectedEmoji(value ?? emojis[0]);
-          onSelect(value ?? emojis[0]);
+          setSelectedEmoji(value ?? undefined);
+          onSelect(value ?? undefined);
         }}
         onClose={() => setQuery("")}
       >
         <div className="relative">
-          <img
-            src={selectedEmoji.path}
-            alt="Emoji"
-            className="w-6 h-6 group absolute inset-y-0 left-0 mx-2.5 my-auto"
-          />
+          {selectedEmoji &&
+            (selectedEmoji.path ? (
+              <img
+                src={selectedEmoji?.path}
+                alt="Emoji"
+                className="w-6 h-6 group absolute inset-y-0 left-0 mx-2.5 my-auto"
+              />
+            ) : (
+              <span className="w-6 h-6 flex text-xl items-center justify-center group absolute inset-y-0 left-0 mx-2.5 my-auto">
+                {getEmojiFromName(selectedEmoji.name)}
+              </span>
+            ))}
           <ComboboxInput
             aria-label="Emoji"
-            displayValue={(emoji: Emoji) => emoji.name}
+            displayValue={(emoji: Emoji | undefined) => emoji?.name || ""}
             onChange={(event) => setQuery(event.target.value)}
-            className={
-              "w-full py-2 rounded-lg border-none bg-neutral-100 pr-8 pl-10 text-md focus:outline-none"
-            }
+            className={clsx(
+              "w-full py-2 rounded-lg border-none bg-neutral-100 pr-8 pl-10 text-md focus:outline-none",
+              !selectedEmoji && "pl-3"
+            )}
           />
           <ComboboxButton className="group absolute inset-y-0 right-0 px-2.5">
             {/* Down chevron */}
@@ -81,9 +94,15 @@ export const EmojiSelect = ({
             <ComboboxOption
               key={emoji.name}
               value={emoji}
-              className="group flex flex-row cursor-default items-center gap-2 rounded-lg py-1.5 px-3 select-none data-[focus]:bg-neutral-200"
+              className="group flex flex-row cursor-default items-center gap-2 rounded-lg py-1.5 px-3 select-none data-[focus]:bg-neutral-200 overflow-hidden"
             >
-              <img src={emoji.path} alt="Emoji" className="w-6 h-6" />
+              {emoji.path ? (
+                <img src={emoji.path} alt="Emoji" className="w-6 h-6" />
+              ) : (
+                <span className="w-6 h-6 flex items-center justify-center text-xl">
+                  {getEmojiFromName(emoji.name)}
+                </span>
+              )}
               {emoji.name}
             </ComboboxOption>
           ))}
