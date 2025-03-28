@@ -124,18 +124,10 @@ export const AuthenticatedHomePage = () => {
           </div>
           <div className="col-span-2 overflow-y-scroll pr-4">
             {currentCalendar && calendarEvents && (
-              <div className="flex flex-col space-y-4">
-                <p className="text-2xl font-bold pb-2">
-                  Upcoming Events for{" "}
-                  <span className="font-extrabold">
-                    {currentCalendar.summary}
-                  </span>
-                </p>
-                <CalendarEventsList
-                  events={calendarEvents}
-                  calendar={currentCalendar}
-                />
-              </div>
+              <CalendarEventsList
+                events={calendarEvents}
+                calendar={currentCalendar}
+              />
             )}
           </div>
           <ModalHowItWorks isOpen={isOpen} onClose={closeModal} />

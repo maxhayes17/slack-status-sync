@@ -1,9 +1,12 @@
-import './App.css';
-import { AuthWrapper } from './components/AuthWrapper';
+import "./App.css";
+import { HomePage } from "./components/HomePage";
+import { AuthenticationProvider } from "./hooks/useAuthentication";
 
 function App() {
   return (
-    <AuthWrapper/>
+    <AuthenticationProvider>
+      <HomePage />
+    </AuthenticationProvider>
   );
 }
 
