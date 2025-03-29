@@ -29,7 +29,7 @@ export const StatusEventBlock = ({ event }: StatusEventBlockProps) => {
 
   return (
     <div
-      className="flex flex-col p-2 space-y-1 rounded-lg bg-neutral-100 hover:cursor-pointer hover:bg-neutral-200 mr-2"
+      className="flex flex-col w-full p-2 space-y-1 rounded-lg dark:bg-neutral-800 bg-neutral-100 hover:cursor-pointer mr-2"
       onClick={openModal}
     >
       <div className="flex flex-row space-x-1 items-center">
@@ -47,7 +47,7 @@ export const StatusEventBlock = ({ event }: StatusEventBlockProps) => {
           ))}
         <p className="font-bold">{event.status_text}</p>
       </div>
-      <p className="text-sm">
+      <p className="dark:text-neutral-400 text-sm">
         {formatDateTime(event.start, false)} -{" "}
         {formatDateTime(event.end, false)}
       </p>

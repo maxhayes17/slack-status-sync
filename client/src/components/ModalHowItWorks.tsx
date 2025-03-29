@@ -23,7 +23,7 @@ export const ModalHowItWorks = ({ isOpen, onClose }: ModalHowItWorksProps) => {
                 <ButtonAddToSlack isDisabled={true} />
               </span>
             </p>
-            <p className="text-sm text-neutral-600 italic">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 italic">
               This allows the Status Syncer to make real-time updates to your
               status in Slack
             </p>
@@ -32,7 +32,7 @@ export const ModalHowItWorks = ({ isOpen, onClose }: ModalHowItWorksProps) => {
             <p>
               Click on event from one of your calendars to create a status event
             </p>
-            <p className="text-sm text-neutral-600 italic">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 italic">
               **Only one-time events are supported for status syncs. If you
               choose a recurring event, the status will stop syncing after the
               first occurrence.
@@ -46,7 +46,7 @@ export const ModalHowItWorks = ({ isOpen, onClose }: ModalHowItWorksProps) => {
                 <ButtonPrimary label="Create" />
               </span>
             </p>
-            <p className="text-sm text-neutral-600 italic">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 italic">
               Status events can be updated until the event starts. After the
               event starts, no changes to the status event will be reflected in
               Slack.

@@ -48,7 +48,7 @@ export const CalendarSelect = ({
             displayValue={(calendar: Calendar) => calendar?.summary}
             onChange={(event) => setQuery(event.target.value)}
             className={
-              "w-full py-2 rounded-lg border-none bg-neutral-100 pr-8 pl-3 text-md focus:outline-none"
+              "w-full py-2 rounded-lg border-none bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-100 pr-8 pl-3 text-md focus:outline-none"
             }
           />
           <ComboboxButton className="group absolute inset-y-0 right-0 px-2.5">
@@ -71,13 +71,13 @@ export const CalendarSelect = ({
         </div>
         <ComboboxOptions
           anchor="bottom"
-          className="w-[var(--input-width)] rounded-xl border border-neutral-100 bg-neutral-100 p-1 mt-2 [--anchor-gap:var(--spacing-1)] empty:invisible"
+          className="w-[var(--input-width)] rounded-xl border border-neutral-100 dark:border-neutral-800 shadow-lg shadow-neutral-300 dark:shadow-black bg-neutral-100 dark:bg-neutral-800 p-1 mt-2 [--anchor-gap:var(--spacing-1)] empty:invisible"
         >
           {filteredCalendars.map((calendar) => (
             <ComboboxOption
               key={calendar.id}
               value={calendar}
-              className="group flex cursor-default items-center gap-2 rounded-lg py-1.5 px-3 select-none data-[focus]:bg-neutral-200"
+              className="group flex cursor-default items-center gap-2 rounded-lg py-1.5 px-3 select-none data-[focus]:bg-neutral-200 dark:data-[focus]:bg-neutral-700 dark:text-neutral-300"
             >
               {/* Checkbox */}
               <svg
@@ -86,7 +86,7 @@ export const CalendarSelect = ({
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="size-4 invisible group-data-[selected]:visible"
+                className="size-4 invisible group-data-[selected]:visible dark:stroke-neutral-100"
               >
                 <path
                   strokeLinecap="round"

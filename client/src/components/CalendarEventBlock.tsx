@@ -18,7 +18,9 @@ export const CalendarEventBlock = ({
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
 
-  const handleStatusEventCreate = async (status_event: Partial<StatusEvent>) => {
+  const handleStatusEventCreate = async (
+    status_event: Partial<StatusEvent>
+  ) => {
     console.log("Creating status event: ", status_event);
     await postStatusEvent(status_event);
     closeModal();
@@ -32,7 +34,7 @@ export const CalendarEventBlock = ({
         color: color ? color.foreground : undefined,
       }}
       className={clsx(
-        "group flex flex-row justify-between p-2 rounded-lg w-2/3 hover:cursor-pointer",
+        "group flex flex-row justify-between p-2 rounded-lg w-full hover:cursor-pointer",
         color ? "hover:bg-opacity-70" : "bg-neutral-100 hover:bg-neutral-200"
       )}
       onClick={openModal}

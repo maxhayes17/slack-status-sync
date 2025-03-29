@@ -77,6 +77,7 @@ def verify_google_cloud_auth(authorization: str = Header(None)):
         raise HTTPException(
             status_code=401, detail="Googe Cloud request is missing auth header"
         )
+    return token
 
 
 # Parses the "Authorization" header for a request, and verifies the token is valid with Firebase

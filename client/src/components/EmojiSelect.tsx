@@ -64,7 +64,7 @@ export const EmojiSelect = ({
             displayValue={(emoji: Emoji | undefined) => emoji?.name || ""}
             onChange={(event) => setQuery(event.target.value)}
             className={clsx(
-              "w-full py-2 rounded-lg border-none bg-neutral-100 pr-8 pl-10 text-md focus:outline-none",
+              "w-full py-2 rounded-lg border-none bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-100 pr-8 pl-10 text-md focus:outline-none",
               !selectedEmoji && "pl-3"
             )}
           />
@@ -88,13 +88,13 @@ export const EmojiSelect = ({
         </div>
         <ComboboxOptions
           anchor="bottom"
-          className="w-[var(--input-width)] !max-h-[118px] overflow-y-auto rounded-xl border border-neutral-100 bg-neutral-100 p-1 mt-2 [--anchor-gap:var(--spacing-1)] empty:invisible"
+          className="w-[var(--input-width)] !max-h-[118px] overflow-y-auto rounded-xl border border-neutral-100 bg-neutral-100 dark:bg-neutral-800 dark:border-neutral-800 shadow-lg shadow-neutral-300 dark:shadow-black p-1 mt-2 [--anchor-gap:var(--spacing-1)] empty:invisible"
         >
           {filteredEmojis.map((emoji) => (
             <ComboboxOption
               key={emoji.name}
               value={emoji}
-              className="group flex flex-row cursor-default items-center gap-2 rounded-lg py-1.5 px-3 select-none data-[focus]:bg-neutral-200 overflow-hidden"
+              className="group flex flex-row cursor-default items-center gap-2 rounded-lg py-1.5 px-3 select-none data-[focus]:bg-neutral-200 dark:data-[focus]:bg-neutral-700 dark:text-neutral-200 overflow-hidden"
             >
               {emoji.path ? (
                 <img src={emoji.path} alt="Emoji" className="w-6 h-6" />

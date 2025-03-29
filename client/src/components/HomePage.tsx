@@ -11,9 +11,9 @@ export const HomePage = () => {
     return <LoadingSpinner />;
   }
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col h-screen w-full dark:bg-neutral-950 dark:text-neutral-100 overflow-hidden">
       {/* Navbar */}
-      <div className="left-0 top-0 z-10 p-4 flex w-full shrink-0 items-center justify-start space-x-2 h-16 bg-neutral-200">
+      <div className="left-0 top-0 z-10 p-4 flex w-full shrink-0 items-center justify-start space-x-2 h-16 bg-neutral-200 dark:bg-neutral-900">
         <ButtonAuthentication />
       </div>
       {/* Body */}

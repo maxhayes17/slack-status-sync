@@ -89,27 +89,27 @@ export const AuthenticatedHomePage = () => {
   return (
     <div>
       {user && (
-        <div className="grid grid-cols-3 space-x-8 h-[85vh]">
-          <div className="col-span-1 flex flex-col space-y-6 text-left">
+        <div className="grid grid-cols-5 space-x-12 h-[85vh]">
+          <div className="col-span-2 flex flex-col space-y-6 text-left">
             <p className="text-4xl font-extrabold">
               Welcome, {user.display_name}!
             </p>
             <div className="flex flex-row items-center justify-start space-x-3">
               {user.slack_user_id ? (
-                <p className="font-extrabold text-green-600">
+                <p className="font-extrabold text-green-600 dark:text-green-500">
                   Connected to Slack
                 </p>
               ) : (
                 <ButtonAddToSlack />
               )}
               <Button
-                className="text-blue-600 font-bold italic text-sm"
+                className="text-blue-600 dark:text-blue-400 font-bold italic text-sm"
                 onClick={openModal}
               >
                 (?) How it works
               </Button>
             </div>
-            <div className="flex flex-col pt-4 space-y-6">
+            <div className="flex flex-col pt-4 space-y-6 pr-8">
               {calendars && calendars.length > 0 && (
                 <CalendarSelect
                   calendars={calendars}
@@ -122,7 +122,7 @@ export const AuthenticatedHomePage = () => {
               )}
             </div>
           </div>
-          <div className="col-span-2 overflow-y-auto pr-4">
+          <div className="col-span-3 overflow-y-auto pr-4">
             {currentCalendar && calendarEvents && (
               <CalendarEventsList
                 events={calendarEvents}

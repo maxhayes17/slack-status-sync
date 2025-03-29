@@ -44,11 +44,11 @@ export const StatusEventEditForm = ({
     statusEvent.status_emoji?.name !== updatedStatusEvent.status_emoji?.name;
 
   return (
-    <Fieldset className="grid grid-cols-3 gap-4">
+    <Fieldset className="grid grid-cols-3 gap-6">
       <Field className={"col-span-2"}>
         <Label className="ml-1 font-bold">* Status Text</Label>
         <Input
-          className="w-full py-2 rounded-lg border-none bg-neutral-100 pr-8 pl-3 text-md focus:outline-none mt-1"
+          className="w-full py-2 rounded-lg border-none bg-neutral-100 dark:bg-neutral-800 text-neutral-100 pr-8 pl-3 text-md focus:outline-none mt-1"
           name="status_text"
           value={updatedStatusEvent.status_text}
           placeholder={statusEvent.status_text}
@@ -67,7 +67,7 @@ export const StatusEventEditForm = ({
           </div>
         ) : (
           <Input
-            className="w-full py-2 rounded-lg border-none bg-neutral-100 pr-8 pl-3 text-md focus:outline-none mt-1"
+            className="w-full py-2 rounded-lg border-none bg-neutral-100 dark:bg-neutral-800 pr-8 pl-3 text-md focus:outline-none mt-1"
             name="status_emoji"
             placeholder="Loading..."
             disabled
@@ -75,7 +75,7 @@ export const StatusEventEditForm = ({
         )}
       </Field>
       {statusEvent.start && statusEvent.end && (
-        <Label className="col-span-full ml-1 italic">
+        <Label className="col-span-full ml-1 italic dark:text-neutral-400">
           From {formatDateTime(statusEvent.start, false)} to{" "}
           {formatDateTime(statusEvent.end, false)}
         </Label>
