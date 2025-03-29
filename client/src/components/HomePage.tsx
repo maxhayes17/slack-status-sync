@@ -17,7 +17,7 @@ export const HomePage = () => {
         <ButtonAuthentication />
       </div>
       {/* Body */}
-      <div className="mx-auto w-full p-8 pt-8">
+      <div className="mx-auto w-full p-12 pt-8">
         {isAuthenticated ? (
           <AuthenticatedHomePage />
         ) : (

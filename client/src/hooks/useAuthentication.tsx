@@ -144,7 +144,7 @@ export const AuthenticationProvider = ({
       {authenticationState.hasAuthenticationBeenChecked ? (
         children
       ) : (
-        <div className="flex justify-center items-center h-screen">
+        <div className="flex justify-center dark:bg-neutral-950 items-center h-screen">
           <LoadingSpinner />
         </div>
       )}

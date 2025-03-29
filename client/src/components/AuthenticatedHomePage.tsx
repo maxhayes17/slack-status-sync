@@ -89,7 +89,7 @@ export const AuthenticatedHomePage = () => {
   return (
     <div>
       {user && (
-        <div className="grid grid-cols-5 space-x-12 h-[85vh]">
+        <div className="grid grid-cols-5 space-x-12 h-[83vh]">
           <div className="col-span-2 flex flex-col space-y-6 text-left">
             <p className="text-4xl font-extrabold">
               Welcome, {user.display_name}!
@@ -109,7 +109,7 @@ export const AuthenticatedHomePage = () => {
                 (?) How it works
               </Button>
             </div>
-            <div className="flex flex-col pt-4 space-y-6 pr-8">
+            <div className="flex flex-col space-y-6">
               {calendars && calendars.length > 0 && (
                 <CalendarSelect
                   calendars={calendars}
@@ -122,7 +122,7 @@ export const AuthenticatedHomePage = () => {
               )}
             </div>
           </div>
-          <div className="col-span-3 overflow-y-auto pr-4">
+          <div className="col-span-3 overflow-y-auto pr-8">
             {currentCalendar && calendarEvents && (
               <CalendarEventsList
                 events={calendarEvents}

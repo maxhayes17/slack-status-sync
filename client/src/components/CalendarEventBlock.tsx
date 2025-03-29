@@ -35,7 +35,7 @@ export const CalendarEventBlock = ({
       }}
       className={clsx(
         "group flex flex-row justify-between p-2 rounded-lg w-full hover:cursor-pointer",
-        color ? "hover:bg-opacity-70" : "bg-neutral-100 hover:bg-neutral-200"
+        !color && "bg-neutral-100 dark:bg-neutral-800"
       )}
       onClick={openModal}
     >
