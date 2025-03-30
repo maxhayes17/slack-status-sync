@@ -1,4 +1,4 @@
-from src.models import User, StatusEvent, StatusSync
+from src.models import User, StatusEvent
 from google.cloud import firestore
 
 db = firestore.Client()
@@ -67,6 +67,7 @@ def put_status_event(event: StatusEvent) -> StatusEvent:
         "status_expiration": event.status_expiration,
         "start": event.start.isoformat(),  # Store timestamps as strings
         "end": event.end.isoformat(),
+        "task_id": event.task_id if event.task_id else None,
     }
     new_status_event.set(status_event_data)
     return StatusEvent(id=new_status_event.id, **status_event_data)
@@ -83,6 +84,7 @@ def update_status_event(event: StatusEvent) -> StatusEvent:
         "status_expiration": event.status_expiration,
         "start": event.start.isoformat(),  # Store timestamps as strings
         "end": event.end.isoformat(),
+        "task_id": event.task_id if event.task_id else None,
     }
     db_event.update(status_event_data)
     return StatusEvent(id=event.id, **status_event_data)
@@ -100,31 +102,4 @@ def get_status_event_by_id(id: str) -> StatusEvent:
 
 def delete_status_event(id: str):
     db.collection("status_events").document(id).delete()
-    return True
-
-
-def put_status_sync(status_sync: StatusSync) -> StatusSync:
-    new_status_sync = db.collection("status_syncs").document()
-    status_sync_data = {
-        "task_id": status_sync.task_id,
-        "status_event_id": status_sync.status_event_id,
-        "user_id": status_sync.user_id,
-        "scheduled_time": status_sync.scheduled_time.isoformat(),
-        "status": status_sync.status,
-    }
-    new_status_sync.set(status_sync_data)
-    return StatusSync(id=new_status_sync.id, **status_sync_data)
-
-
-def get_status_sync_by_task_id(task_id: str):
-    status_syncs = (
-        db.collection("status_syncs").where("task_id", "==", task_id).limit(1).stream()
-    )
-    for doc in status_syncs:
-        return StatusSync(id=doc.id, **doc.to_dict())
-    return None
-
-
-def delete_status_sync(id: str):
-    db.collection("status_syncs").document(id).delete()
     return True

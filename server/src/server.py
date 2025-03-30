@@ -18,7 +18,6 @@ from src.models import (
     Emoji,
     StatusEvent,
     StatusEventRequest,
-    StatusSync,
 )
 from src.database import (
     get_user_by_id,
@@ -30,8 +29,6 @@ from src.database import (
     get_status_event_by_id,
     get_status_events_by_user,
     delete_status_event as delete_db_status_event,
-    put_status_sync,
-    get_status_sync_by_task_id,
 )
 from datetime import datetime, timezone, timedelta
 
@@ -282,18 +279,11 @@ async def post_status_event(
         if not task:
             raise HTTPException(status_code=500, detail="Error creating task")
 
-        # insert record of this task in db
-        task_id = task.name.split("/")[-1]
-        db_sync = StatusSync(
-            task_id=task_id,
-            status_event_id=new_status_event.id,
-            user_id=user.id,
-            schedule_time=schedule_time,
-            status="queued",
-        )
-        put_status_sync(db_sync)
+        # update new event with task id
+        new_status_event.task_id = task.name.split("/")[-1]
+        # update status event in db
+        return update_status_event(new_status_event)
 
-        return new_status_event
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error creating status event")
@@ -341,12 +331,16 @@ async def delete_status_event(
     try:
         # resolve user from auth
         user = resolve_user(auth)
-        # delete status event
+        # make sure status event exists
         status_event = get_status_event_by_id(status_event_id)
         if not status_event:
             raise HTTPException(status_code=404, detail="Status event not found")
-        # TODO
-        # Delete status event in DB
+
+        # delete queued task for event if before the event start time
+        if datetime.now(timezone.utc) < status_event.start.replace(tzinfo=timezone.utc):
+            delete_task(status_event.task_id)
+
+        # delete status event in DB
         deleted = delete_db_status_event(status_event_id)
         if not deleted:
             raise HTTPException(status_code=500, detail="Error deleting status event")
@@ -513,6 +507,21 @@ def create_task(status_event_id: str, schedule_time: datetime):
         GOOGLE_CLOUD_PROJECT_ID, GOOGLE_CLOUD_LOCATION, GOOGLE_CLOUD_QUEUE_NAME
     )
     return tasks_client.create_task(tasks_v2.CreateTaskRequest(parent=path, task=task))
+
+
+def delete_task(task_id: str):
+    try:
+        # configure path for queue
+        path = tasks_client.queue_path(
+            GOOGLE_CLOUD_PROJECT_ID, GOOGLE_CLOUD_LOCATION, GOOGLE_CLOUD_QUEUE_NAME
+        )
+        # delete task
+        tasks_client.delete_task(
+            tasks_v2.DeleteTaskRequest(name=f"{path}/tasks/{task_id}")
+        )
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Error deleting Cloud Task")
 
 
 def update_slack_status(event: StatusEvent):

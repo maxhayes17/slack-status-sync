@@ -109,7 +109,7 @@ export const AuthenticatedHomePage = () => {
                 (?) How it works
               </Button>
             </div>
-            <div className="flex flex-col space-y-6">
+            <div className="flex flex-col space-y-6 pt-4">
               {calendars && calendars.length > 0 && (
                 <CalendarSelect
                   calendars={calendars}
@@ -122,7 +122,7 @@ export const AuthenticatedHomePage = () => {
               )}
             </div>
           </div>
-          <div className="col-span-3 overflow-y-auto pr-8">
+          <div className="col-span-3 overflow-y-auto pr-12">
             {currentCalendar && calendarEvents && (
               <CalendarEventsList
                 events={calendarEvents}
