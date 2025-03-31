@@ -6,12 +6,12 @@ import {
   Label,
   Legend,
 } from "@headlessui/react";
-import { CalendarEvent, Emoji } from "../utils/types";
+import { CalendarEvent, Emoji, User } from "../utils/types";
 import { formatDateTime } from "../utils/date";
 import { StatusEvent } from "../utils/types";
 import { useEffect, useState } from "react";
 import { ButtonPrimary } from "./ButtonPrimary";
-import { getSlackEmojis } from "../utils/utils";
+import { getSlackEmojis, getUser } from "../utils/utils";
 import { EmojiSelect } from "./EmojiSelect";
 
 type StatusEventCreateFormProps = {
@@ -34,10 +34,16 @@ export const StatusEventCreateForm = ({
   const [statusEvent, setStatusEvent] =
     useState<Partial<StatusEvent>>(INITIAL_STATUS_EVENT);
 
+  const [user, setUser] = useState<User | null>(null);
   const [slackEmojis, setSlackEmojis] = useState<Emoji[] | null>(null);
-  const getSlackEmojiData = async () => {
-    const resp = await getSlackEmojis();
-    setSlackEmojis(resp);
+
+  const getPageData = async () => {
+    const resp = await getUser();
+    setUser(resp);
+    if (resp?.slack_user_id) {
+      const emojis = await getSlackEmojis();
+      setSlackEmojis(emojis);
+    }
   };
 
   const handleChange = (
@@ -47,11 +53,19 @@ export const StatusEventCreateForm = ({
     setStatusEvent({ ...statusEvent, [key]: value });
   };
 
+  // In dev Strict Mode, React components will mount/unmount/remount by design, which means effects will run twice.
+  // use a local variable to track if the component is mounted to avoid fetching twice.
+  let isMounted = false;
+  
   useEffect(() => {
-    getSlackEmojiData();
+    if (!isMounted) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      isMounted = true;
+      getPageData();
+    }
   }, []);
 
-  const isValid = statusEvent.status_text;
+  const isValid = user && user.slack_user_id && statusEvent.status_text;
 
   return (
     <Fieldset className="grid grid-cols-3 gap-6">
@@ -69,7 +83,7 @@ export const StatusEventCreateForm = ({
       </Field>
       <Field className={"col-span-1"}>
         <Label className="ml-1 font-bold">Status Emoji</Label>
-        {slackEmojis ? (
+        {user && user.slack_user_id && slackEmojis ? (
           <div className="mt-1">
             <EmojiSelect
               emojis={slackEmojis}
@@ -90,6 +104,12 @@ export const StatusEventCreateForm = ({
           From {formatDateTime(statusEvent.start, false)} to{" "}
           {formatDateTime(statusEvent.end, false)}
         </Label>
+      )}
+      {user && !user.slack_user_id && (
+        <div className="col-span-full text-center text-red-600">
+          <p>Whoops! it doesn't look like you are set up with Slack yet.</p>
+          <p>Add this application to Slack to start creating Status Events</p>
+        </div>
       )}
       <div className="col-span-full flex flex-row justify-end space-x-4">
         <Button

@@ -213,6 +213,10 @@ async def get_slack_emojis(auth: Authorization = Depends(verify_authorization)):
 
         return slack_emojis + base_emojis
 
+    # bubble up any specific exception raised in the try block
+    except HTTPException as http_exception:
+        raise http_exception
+    # catch all other exceptions, and raise as a 500
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error retrieving slack emojis")
@@ -237,7 +241,13 @@ async def get_user(auth: Authorization = Depends(verify_authorization)):
                     display_name=auth.data["name"],
                 )
             )
+        # strip sensitive data from user before passing back
+        user.slack_access_token = None
         return user
+    # bubble up any specific exception raised in the try block
+    except HTTPException as http_exception:
+        raise http_exception
+    # catch all other exceptions, and raise as a 500
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error retrieving user")
@@ -284,6 +294,10 @@ async def post_status_event(
         # update status event in db
         return update_status_event(new_status_event)
 
+    # bubble up any specific exception raised in the try block
+    except HTTPException as http_exception:
+        raise http_exception
+    # catch all other exceptions, and raise as a 500
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error creating status event")
@@ -319,6 +333,10 @@ async def patch_status_event(
         )
 
         return update_status_event(new_status_event)
+    # bubble up any specific exception raised in the try block
+    except HTTPException as http_exception:
+        raise http_exception
+    # catch all other exceptions, and raise as a 500
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error updating status event")
@@ -345,7 +363,10 @@ async def delete_status_event(
         if not deleted:
             raise HTTPException(status_code=500, detail="Error deleting status event")
 
-        # Remove status event from task queue
+    # bubble up any specific exception raised in the try block
+    except HTTPException as http_exception:
+        raise http_exception
+    # catch all other exceptions, and raise as a 500
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error deleting status event")
@@ -362,6 +383,11 @@ async def get_status_events(
         user = resolve_user(auth)
         # return all status events for that user
         return get_status_events_by_user(user.id)
+
+    # bubble up any specific exception raised in the try block
+    except HTTPException as http_exception:
+        raise http_exception
+    # catch all other exceptions, and raise as a 500
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error retrieving status events")
@@ -395,6 +421,11 @@ async def get_calendars(auth: Authorization = Depends(verify_authorization)):
             )
             for item in items
         ]
+
+    # bubble up any specific exception raised in the try block
+    except HTTPException as http_exception:
+        raise http_exception
+    # catch all other exceptions, and raise as a 500
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error retrieving calendars")
@@ -450,6 +481,10 @@ async def get_calendar_events(
             )
             for item in items
         ]
+    # bubble up any specific exception raised in the try block
+    except HTTPException as http_exception:
+        raise http_exception
+    # catch all other exceptions, and raise as a 500
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error retrieving calendars")
@@ -510,18 +545,12 @@ def create_task(status_event_id: str, schedule_time: datetime):
 
 
 def delete_task(task_id: str):
-    try:
-        # configure path for queue
-        path = tasks_client.queue_path(
-            GOOGLE_CLOUD_PROJECT_ID, GOOGLE_CLOUD_LOCATION, GOOGLE_CLOUD_QUEUE_NAME
-        )
-        # delete task
-        tasks_client.delete_task(
-            tasks_v2.DeleteTaskRequest(name=f"{path}/tasks/{task_id}")
-        )
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail="Error deleting Cloud Task")
+    # configure path for queue
+    path = tasks_client.queue_path(
+        GOOGLE_CLOUD_PROJECT_ID, GOOGLE_CLOUD_LOCATION, GOOGLE_CLOUD_QUEUE_NAME
+    )
+    # delete task
+    tasks_client.delete_task(tasks_v2.DeleteTaskRequest(name=f"{path}/tasks/{task_id}"))
 
 
 def update_slack_status(event: StatusEvent):
@@ -562,6 +591,10 @@ def update_slack_status(event: StatusEvent):
 
         return data
 
+    # bubble up any specific exception raised in the try block
+    except HTTPException as http_exception:
+        raise http_exception
+    # catch all other exceptions, and raise as a 500
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error updating Slack status")
@@ -577,8 +610,6 @@ async def sync_status_event(
     auth: str = Depends(verify_google_cloud_auth),
 ):
     try:
-        # TODO - remove this
-        print(request)
         # TODO - auth check account making request, and resolve task_id
         if not auth:
             raise HTTPException(status_code=401, detail="Invalid token")
@@ -593,9 +624,10 @@ async def sync_status_event(
         if not response:
             raise HTTPException(status_code=500, detail="Error syncing status event")
 
-        # TODO update db record to successful sync
-
+    # bubble up any specific exception raised in the try block
+    except HTTPException as http_exception:
+        raise http_exception
+    # catch all other exceptions, and raise as a 500
     except Exception as e:
-        # TODO update db record to unsuccessful sync
         print(e)
         raise HTTPException(status_code=500, detail="Error syncing status event")

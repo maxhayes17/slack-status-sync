@@ -14,6 +14,10 @@ import { Button } from "@headlessui/react";
 import { ModalHowItWorks } from "./ModalHowItWorks";
 import { LoadingSpinner } from "./LoadingSpinner";
 
+// In dev Strict Mode, React components will mount/unmount/remount by design, which means effects will run twice.
+// use a local variable to track if the component is mounted to avoid fetching twice.
+let isMounted = false;
+
 export const AuthenticatedHomePage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const openModal = () => setIsOpen(true);
@@ -73,7 +77,11 @@ export const AuthenticatedHomePage = () => {
   };
 
   useEffect(() => {
-    getPageData();
+    if (!isMounted) {
+      isMounted = true;
+      getPageData();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (isLoading) {

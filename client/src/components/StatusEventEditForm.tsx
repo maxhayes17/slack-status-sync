@@ -35,8 +35,17 @@ export const StatusEventEditForm = ({
     setUpdatedStatusEvent({ ...updatedStatusEvent, [key]: value });
   };
 
+
+  // In dev Strict Mode, React components will mount/unmount/remount by design, which means effects will run twice.
+  // use a local variable to track if the component is mounted to avoid fetching twice.
+  let isMounted = false;
+  
   useEffect(() => {
-    getSlackEmojiData();
+    if (!isMounted) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      isMounted = true;
+      getSlackEmojiData();
+    }
   }, []);
 
   const isValid =
