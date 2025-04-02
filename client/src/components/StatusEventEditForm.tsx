@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ButtonPrimary } from "./ButtonPrimary";
 import { getSlackEmojis } from "../utils/utils";
 import { EmojiSelect } from "./EmojiSelect";
+import { ErrorMessage } from "./ErrorMessage";
 
 type StatusEventEditFormProps = {
   statusEvent: StatusEvent;
@@ -19,13 +20,20 @@ export const StatusEventEditForm = ({
   onCancel,
   onDelete,
 }: StatusEventEditFormProps) => {
+  const [isError, setIsError] = useState(false);
+
   const [updatedStatusEvent, setUpdatedStatusEvent] =
     useState<StatusEvent>(statusEvent);
 
   const [slackEmojis, setSlackEmojis] = useState<Emoji[] | null>(null);
   const getSlackEmojiData = async () => {
-    const resp = await getSlackEmojis();
-    setSlackEmojis(resp);
+    try {
+      const resp = await getSlackEmojis();
+      setSlackEmojis(resp);
+    } catch (error) {
+      setIsError(true);
+      console.error("Error fetching Slack emojis:", error);
+    }
   };
 
   const handleChange = (
@@ -35,11 +43,10 @@ export const StatusEventEditForm = ({
     setUpdatedStatusEvent({ ...updatedStatusEvent, [key]: value });
   };
 
-
   // In dev Strict Mode, React components will mount/unmount/remount by design, which means effects will run twice.
   // use a local variable to track if the component is mounted to avoid fetching twice.
   let isMounted = false;
-  
+
   useEffect(() => {
     if (!isMounted) {
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -49,8 +56,9 @@ export const StatusEventEditForm = ({
   }, []);
 
   const isValid =
-    statusEvent.status_text !== updatedStatusEvent.status_text ||
-    statusEvent.status_emoji?.name !== updatedStatusEvent.status_emoji?.name;
+    !isError &&
+    (statusEvent.status_text !== updatedStatusEvent.status_text ||
+      statusEvent.status_emoji?.name !== updatedStatusEvent.status_emoji?.name);
 
   return (
     <Fieldset className="grid grid-cols-3 gap-6">
@@ -87,6 +95,11 @@ export const StatusEventEditForm = ({
           From {formatDateTime(statusEvent.start, false)} to{" "}
           {formatDateTime(statusEvent.end, false)}
         </Label>
+      )}
+      {isError && (
+        <div className="col-span-full">
+          <ErrorMessage size="small" />
+        </div>
       )}
       <div className="flex flex-row col-span-full justify-between">
         <Button

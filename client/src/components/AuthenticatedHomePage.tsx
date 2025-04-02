@@ -13,10 +13,7 @@ import { StatusEventsList } from "./StatusEventsList";
 import { Button } from "@headlessui/react";
 import { ModalHowItWorks } from "./ModalHowItWorks";
 import { LoadingSpinner } from "./LoadingSpinner";
-
-// In dev Strict Mode, React components will mount/unmount/remount by design, which means effects will run twice.
-// use a local variable to track if the component is mounted to avoid fetching twice.
-let isMounted = false;
+import { ErrorMessage } from "./ErrorMessage";
 
 export const AuthenticatedHomePage = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,52 +44,78 @@ export const AuthenticatedHomePage = () => {
     setIsLoading(false);
   };
 
+  // for fetches that are part of populating the page,
+  // just throw the error to bubble it up, and getPageData will set the error
   const getUserData = async () => {
-    const resp = await getUser();
-    setUser(resp);
+    try {
+      const resp = await getUser();
+      setUser(resp);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      throw error;
+    }
   };
   const getCalendarsData = async () => {
-    const resp = await getCalendars();
-    setCalendars(resp);
-    if (resp && resp.length > 0) {
-      setCurrentCalendar(resp[0]);
-      await getCalendarEventsData(resp[0].id);
+    try {
+      const resp = await getCalendars();
+      setCalendars(resp);
+      if (resp && resp.length > 0) {
+        setCurrentCalendar(resp[0]);
+        await getCalendarEventsData(resp[0].id);
+      }
+    } catch (error) {
+      console.error("Error fetching calendars data:", error);
+      throw error;
     }
   };
   const getCalendarEventsData = async (calendarId: string) => {
-    const resp = await getCalendarEvents(calendarId);
-    const sorted = resp?.sort((a, b) => {
-      return new Date(a.start).getTime() - new Date(b.start).getTime();
-    });
-    setCalendarEvents(sorted ?? null);
+    try {
+      const resp = await getCalendarEvents(calendarId);
+      const sorted = resp?.sort((a, b) => {
+        return new Date(a.start).getTime() - new Date(b.start).getTime();
+      });
+      setCalendarEvents(sorted ?? null);
+    } catch (error) {
+      console.error("Error fetching calendar events:", error);
+      setIsError(true);
+    }
   };
   const getStatusEventsData = async () => {
-    const resp = await getStatusEvents();
-    setStatusEvents(resp);
+    try {
+      const resp = await getStatusEvents();
+      setStatusEvents(resp);
+    } catch (error) {
+      console.error("Error fetching status events data:", error);
+      throw error;
+    }
   };
 
   const handleCalendarSelect = (calendar: Calendar) => {
-    setCurrentCalendar(calendar);
-    getCalendarEventsData(calendar.id);
+    try {
+      setCurrentCalendar(calendar);
+      getCalendarEventsData(calendar.id);
+    } catch (error) {
+      console.error("Error selecting calendar:", error);
+      setIsError(true);
+    }
   };
+
+  // In dev Strict Mode, React components will mount/unmount/remount by design, which means effects will run twice.
+  // use a local variable to track if the component is mounted to avoid fetching twice.
+  let isMounted = false;
 
   useEffect(() => {
     if (!isMounted) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       isMounted = true;
       getPageData();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (isLoading) {
     return <LoadingSpinner />;
   } else if (isError) {
-    return (
-      <div className="flex flex-col max-w-fit max-h-fit mx-auto mt-12 p-4 text-center rounded-lg bg-red-200">
-        <p className="text-xl font-bold">Whoops! We encountered an Error.</p>
-        <p className="text-md">Please refresh this page and try again.</p>
-      </div>
-    );
+    return <ErrorMessage />;
   }
   return (
     <div>

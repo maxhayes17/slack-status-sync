@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { ButtonPrimary } from "./ButtonPrimary";
 import { getSlackEmojis, getUser } from "../utils/utils";
 import { EmojiSelect } from "./EmojiSelect";
+import { ErrorMessage } from "./ErrorMessage";
 
 type StatusEventCreateFormProps = {
   event: CalendarEvent;
@@ -31,6 +32,8 @@ export const StatusEventCreateForm = ({
     end: event.end,
   };
 
+  const [isError, setIsError] = useState(false);
+
   const [statusEvent, setStatusEvent] =
     useState<Partial<StatusEvent>>(INITIAL_STATUS_EVENT);
 
@@ -38,11 +41,16 @@ export const StatusEventCreateForm = ({
   const [slackEmojis, setSlackEmojis] = useState<Emoji[] | null>(null);
 
   const getPageData = async () => {
-    const resp = await getUser();
-    setUser(resp);
-    if (resp?.slack_user_id) {
-      const emojis = await getSlackEmojis();
-      setSlackEmojis(emojis);
+    try {
+      const resp = await getUser();
+      setUser(resp);
+      if (resp?.slack_user_id) {
+        const emojis = await getSlackEmojis();
+        setSlackEmojis(emojis);
+      }
+    } catch (error) {
+      setIsError(true);
+      console.error("Error fetching user or emojis:", error);
     }
   };
 
@@ -56,7 +64,7 @@ export const StatusEventCreateForm = ({
   // In dev Strict Mode, React components will mount/unmount/remount by design, which means effects will run twice.
   // use a local variable to track if the component is mounted to avoid fetching twice.
   let isMounted = false;
-  
+
   useEffect(() => {
     if (!isMounted) {
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -65,7 +73,8 @@ export const StatusEventCreateForm = ({
     }
   }, []);
 
-  const isValid = user && user.slack_user_id && statusEvent.status_text;
+  const isValid =
+    !isError && user && user.slack_user_id && statusEvent.status_text;
 
   return (
     <Fieldset className="grid grid-cols-3 gap-6">
@@ -104,11 +113,20 @@ export const StatusEventCreateForm = ({
           {formatDateTime(statusEvent.end, false)}
         </Label>
       )}
-      {user && !user.slack_user_id && (
-        <div className="col-span-full text-center text-red-600">
-          <p>Whoops! it doesn't look like you are set up with Slack yet.</p>
-          <p>Add this application to Slack to start creating Status Events.</p>
+      {isError && (
+        <div className="col-span-full">
+          <ErrorMessage size="small" />
         </div>
+      )}
+      {user && !user.slack_user_id && (
+        <ErrorMessage size="small">
+          <p className="font-bold">
+            It doesn't look like you are set up with Slack yet.
+          </p>
+          <p className="text-sm">
+            Add this application to Slack to start creating Status Events.
+          </p>
+        </ErrorMessage>
       )}
       <div className="col-span-full flex flex-row justify-end space-x-4">
         <Button

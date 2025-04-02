@@ -4,24 +4,30 @@ import { Calendar, User, CalendarEvent, StatusEvent, Emoji } from "./types";
 export const STATUS_SYNCER_SERVER_URL =
   process.env.REACT_APP_STATUS_SYNCER_SERVER_URL;
 
-export const getSlackAuthentication = async () => {
+export const getSlackAuthentication = async (): Promise<void> => {
   try {
     const resp = await fetch(`${STATUS_SYNCER_SERVER_URL}/auth/slack`, {
       headers: await getAuthHeaders(),
     });
+    if (!resp.ok) {
+      throw new Error("Failed to fetch user data");
+    }
     const data = await resp.json();
     window.location.href = data.url;
   } catch (error) {
     console.error("Error authenticating with Slack", error);
-    return null;
+    throw error;
   }
 };
 
-export const getSlackEmojis = async () => {
+export const getSlackEmojis = async (): Promise<Emoji[]> => {
   try {
     const resp = await fetch(`${STATUS_SYNCER_SERVER_URL}/slack/emojis`, {
       headers: await getAuthHeaders(),
     });
+    if (!resp.ok) {
+      throw new Error("Failed to fetch user data");
+    }
     const data = await resp.json();
     return (
       data &&
@@ -35,15 +41,18 @@ export const getSlackEmojis = async () => {
     );
   } catch (error) {
     console.error("Error fetching Slack emojis", error);
-    return null;
+    throw error;
   }
 };
 
-export const getUser = async (): Promise<User | null> => {
+export const getUser = async (): Promise<User> => {
   try {
     const resp = await fetch(`${STATUS_SYNCER_SERVER_URL}/users/me`, {
       headers: await getAuthHeaders(),
     });
+    if (!resp.ok) {
+      throw new Error("Failed to fetch user data");
+    }
     const data = await resp.json();
     return (
       data &&
@@ -56,15 +65,18 @@ export const getUser = async (): Promise<User | null> => {
     );
   } catch (error) {
     console.error("Error fetching user data:", error);
-    return null;
+    throw error;
   }
 };
 
-export const getCalendars = async (): Promise<Calendar[] | null> => {
+export const getCalendars = async (): Promise<Calendar[]> => {
   try {
     const resp = await fetch(`${STATUS_SYNCER_SERVER_URL}/calendars`, {
       headers: await getAuthHeaders(),
     });
+    if (!resp.ok) {
+      throw new Error("Failed fetching calendars");
+    }
     const data = await resp.json();
     return (
       data &&
@@ -81,13 +93,13 @@ export const getCalendars = async (): Promise<Calendar[] | null> => {
     );
   } catch (error) {
     console.error("Error fetching calendars:", error);
-    return null;
+    throw error;
   }
 };
 
 export const getCalendarEvents = async (
   calendarId: string
-): Promise<CalendarEvent[] | null> => {
+): Promise<CalendarEvent[]> => {
   try {
     // since these ids can have some special characters, encode before fetching
     const encodedCalendarId = encodeURIComponent(calendarId);
@@ -98,6 +110,9 @@ export const getCalendarEvents = async (
         headers: await getAuthHeaders(),
       }
     );
+    if (!resp.ok) {
+      throw new Error("Failed fetching calendar events");
+    }
     const data = await resp.json();
     return (
       data &&
@@ -117,15 +132,18 @@ export const getCalendarEvents = async (
     );
   } catch (error) {
     console.error("Error fetching calendar events:", error);
-    return null;
+    throw error;
   }
 };
 
-export const getStatusEvents = async (): Promise<StatusEvent[] | null> => {
+export const getStatusEvents = async (): Promise<StatusEvent[]> => {
   try {
     const resp = await fetch(`${STATUS_SYNCER_SERVER_URL}/status-events`, {
       headers: await getAuthHeaders(),
     });
+    if (!resp.ok) {
+      throw new Error("Failed fetching status events");
+    }
     const data = await resp.json();
     return (
       data &&
@@ -146,13 +164,13 @@ export const getStatusEvents = async (): Promise<StatusEvent[] | null> => {
     );
   } catch (error) {
     console.error("Error fetching status events:", error);
-    return null;
+    throw error;
   }
 };
 
 export const postStatusEvent = async (
   statusEvent: Partial<StatusEvent>
-): Promise<StatusEvent | null> => {
+): Promise<StatusEvent> => {
   try {
     const resp = await fetch(`${STATUS_SYNCER_SERVER_URL}/status-events`, {
       method: "POST",
@@ -162,6 +180,9 @@ export const postStatusEvent = async (
       },
       body: JSON.stringify(statusEvent),
     });
+    if (!resp.ok) {
+      throw new Error("Failed to post status event");
+    }
     const data = await resp.json();
     return (
       data &&
@@ -179,13 +200,13 @@ export const postStatusEvent = async (
     );
   } catch (error) {
     console.error("Error posting status event:", error);
-    return null;
+    throw error;
   }
 };
 
 export const patchStatusEvent = async (
   statusEvent: StatusEvent
-): Promise<StatusEvent | null> => {
+): Promise<StatusEvent> => {
   try {
     const resp = await fetch(
       `${STATUS_SYNCER_SERVER_URL}/status-events/${statusEvent.id}`,
@@ -198,6 +219,9 @@ export const patchStatusEvent = async (
         body: JSON.stringify(statusEvent),
       }
     );
+    if (!resp.ok) {
+      throw new Error("Failed to patch status event");
+    }
     const data = await resp.json();
     return (
       data &&
@@ -214,8 +238,8 @@ export const patchStatusEvent = async (
       } as StatusEvent)
     );
   } catch (error) {
-    console.error("Error posting status event:", error);
-    return null;
+    console.error("Error patching status event:", error);
+    throw error;
   }
 };
 
@@ -227,5 +251,6 @@ export const deleteStatusEvent = async (statusEvent: StatusEvent) => {
     });
   } catch (error) {
     console.error("Error deleting status event:", error);
+    throw error;
   }
 };
