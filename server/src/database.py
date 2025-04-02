@@ -32,7 +32,7 @@ def update_user(user: User) -> User:
 
 def get_user_by_id(user_id: str) -> User:
     user = db.collection("users").document(user_id).get()
-    return User(id=user.id, **user.to_dict())
+    return User(id=user.id, **user.to_dict()) if user.exists else None
 
 
 # Get user by their email (should be unique)
@@ -97,7 +97,7 @@ def get_status_events_by_user(user_id: str):
 
 def get_status_event_by_id(id: str) -> StatusEvent:
     event = db.collection("status_events").document(id).get()
-    return StatusEvent(id=event.id, **event.to_dict())
+    return StatusEvent(id=event.id, **event.to_dict()) if event.exists else None
 
 
 def delete_status_event(id: str):

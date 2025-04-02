@@ -126,10 +126,18 @@ def verify_google_cloud_auth(authorization: str = Header(None)):
         decoded = id_token.verify_oauth2_token(
             token,
             google_requests.Request(),
-            # audience=GOOGLE_CLOUD_SERVICE_ACCOUNT,
         )
-        print(decoded)
-        return token
+        if not decoded["aud"].startswith(SERVER_BASE_URL):
+            raise HTTPException(
+                status_code=401,
+                detail="Google Cloud request has invalid audience",
+            )
+        if not decoded["email"] == GOOGLE_CLOUD_SERVICE_ACCOUNT:
+            raise HTTPException(
+                status_code=401,
+                detail="Google Cloud request has invalid service account",
+            )
+        return decoded
     except HTTPException as http_exception:
         raise http_exception
     except Exception as e:
@@ -667,7 +675,6 @@ async def sync_status_event(
     auth: str = Depends(verify_google_cloud_auth),
 ):
     try:
-        # TODO - auth check account making request, and resolve task_id
         if not auth:
             raise HTTPException(status_code=401, detail="Invalid token")
 
