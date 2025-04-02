@@ -2,12 +2,13 @@ import requests
 from fastapi import FastAPI, HTTPException, Header, Depends, Request
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer
 from google.oauth2 import id_token, credentials
 from google.cloud import tasks_v2
 from google.protobuf import timestamp_pb2
 from google.auth.transport import requests as google_requests
 from googleapiclient.discovery import build
+import firebase_admin
+from firebase_admin import auth
 import os
 from src.models import (
     Authorization,
@@ -63,18 +64,77 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+if not firebase_admin._apps:
+    firebase_admin.initialize_app()
+
 tasks_client = tasks_v2.CloudTasksClient()
+
+
+# Verifies the Firebase ID token is valid for this app
+def verify_firebase_id_token(token: str):
+    try:
+        decoded = auth.verify_id_token(token)
+        return decoded
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=401, detail="Invalid Firebase ID token")
+
+
+# Verifies the Google Access Token is valid for this app
+# this has to be done via API request since Google auth libraries don't support
+# opaque tokens (i.e., tokens not in JWT format)
+def verify_google_access_token(token: str):
+    try:
+        response = requests.get(
+            f"https://www.googleapis.com/oauth2/v3/tokeninfo?access_token={token}"
+        )
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=401, detail="Failed verifying Google Access Token"
+            )
+
+        data = response.json()
+        if data["aud"] != GOOGLE_CLIENT_ID:
+            raise HTTPException(
+                status_code=401, detail="Google Access Token is not valid for this app"
+            )
+        return data
+
+    except HTTPException as http_exception:
+        raise http_exception
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=401, detail="Invalid Google Access Token")
 
 
 # Verifies requests made from Google Cloud Task API
 # this is verified separately from user requests since the Google Cloud Task API headers are slightly different
+# this is broken out from the verify_authorization function since the headers slightly differ
 def verify_google_cloud_auth(authorization: str = Header(None)):
-    token = authorization.split("Bearer ")[1]
-    if not token:
+    if not authorization:
         raise HTTPException(
-            status_code=401, detail="Googe Cloud request is missing auth header"
+            status_code=401,
+            detail="Google Cloud request is missing Authorization header",
         )
-    return token
+    try:
+        token = authorization.split("Bearer ")[1]
+        if not token:
+            raise HTTPException(
+                status_code=401, detail="Google Cloud request is missing token"
+            )
+        # can use verify_oauth2_token since this token *is* a JWT
+        decoded = id_token.verify_oauth2_token(
+            token,
+            google_requests.Request(),
+            # audience=GOOGLE_CLOUD_SERVICE_ACCOUNT,
+        )
+        print(decoded)
+        return token
+    except HTTPException as http_exception:
+        raise http_exception
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 # Parses the "Authorization" header for a request, and verifies the token is valid with Firebase
@@ -87,23 +147,22 @@ def verify_authorization(
         raise HTTPException(
             status_code=401, detail="Request is missing Authorization header"
         )
-
+    if not x_oauth_access_token:
+        raise HTTPException(
+            status_code=401, detail="Request is missing Google Access Token header"
+        )
     try:
         token = authorization.split("Bearer ")[1]
-        # TODO - this is not very secure - should verify with firebase service account?
-        decoded = id_token.verify_firebase_token(
-            token, google_requests.Request(), FIREBASE_PROJECT_ID
-        )
-
-        # TODO - should actually verify this token instead of just checking it's there
-        if not x_oauth_access_token:
-            raise HTTPException(
-                status_code=401, detail="Request is missing Google Access Token header"
-            )
+        decoded_id_token = verify_firebase_id_token(token)
+        # don't need to assign a value since we don't do anything with the decoded access token
+        verify_google_access_token(x_oauth_access_token)
 
         return Authorization(
-            id_token=token, access_token=x_oauth_access_token, data=decoded
+            id_token=token, access_token=x_oauth_access_token, data=decoded_id_token
         )
+    # bubble up any specific exception raised in the try block
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
         print(e)
         raise HTTPException(status_code=401, detail="Invalid token")
@@ -174,7 +233,6 @@ async def auth_slack_callback(request: Request, code: str, state: str):
 
 
 # Gets all emojis in the slack workspace a user has approved access to
-# As of right now, this only gets *custom Slack emojis* (not the default ones)
 @app.get("/slack/emojis")
 async def get_slack_emojis(auth: Authorization = Depends(verify_authorization)):
     try:
@@ -606,7 +664,6 @@ def update_slack_status(event: StatusEvent):
 @app.post("/status-events/{status_event_id}/sync")
 async def sync_status_event(
     status_event_id: str,
-    request: Request,
     auth: str = Depends(verify_google_cloud_auth),
 ):
     try:

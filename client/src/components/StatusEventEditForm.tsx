@@ -78,7 +78,6 @@ export const StatusEventEditForm = ({
           <Input
             className="w-full py-2 rounded-lg border-none bg-neutral-100 dark:bg-neutral-800 pr-8 pl-3 text-md focus:outline-none mt-1"
             name="status_emoji"
-            placeholder="Loading..."
             disabled
           />
         )}

@@ -94,7 +94,6 @@ export const StatusEventCreateForm = ({
           <Input
             className="w-full py-2 rounded-lg border-none bg-neutral-100 dark:bg-neutral-800 pr-8 pl-3 text-md focus:outline-none mt-1"
             name="status_emoji"
-            placeholder="Loading..."
             disabled
           />
         )}
@@ -108,7 +107,7 @@ export const StatusEventCreateForm = ({
       {user && !user.slack_user_id && (
         <div className="col-span-full text-center text-red-600">
           <p>Whoops! it doesn't look like you are set up with Slack yet.</p>
-          <p>Add this application to Slack to start creating Status Events</p>
+          <p>Add this application to Slack to start creating Status Events.</p>
         </div>
       )}
       <div className="col-span-full flex flex-row justify-end space-x-4">

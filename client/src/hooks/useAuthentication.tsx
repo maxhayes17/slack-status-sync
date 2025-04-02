@@ -46,7 +46,7 @@ export const AuthenticationProvider = ({
   const [authenticationState, setAuthenticationState] =
     useState<AuthenticationState>({
       isAuthenticated: false,
-      hasAuthenticationBeenChecked: false, // Tracking this value allows us to avoid redirect loops
+      hasAuthenticationBeenChecked: false, // Tracking this to avoid redirect loops
     });
 
   useEffect(() => {
