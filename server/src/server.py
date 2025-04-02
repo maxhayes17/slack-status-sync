@@ -32,6 +32,7 @@ from src.database import (
     delete_status_event as delete_db_status_event,
 )
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 
 SERVER_BASE_URL = os.environ.get("SERVER_BASE_URL")
 CLIENT_BASE_URL = os.environ.get("CLIENT_BASE_URL")
@@ -511,6 +512,10 @@ async def get_calendar_events(
     cred = credentials.Credentials(token=auth.access_token)
     service = build("calendar", "v3", credentials=cred)
     try:
+        calendar = service.calendarList().get(calendarId=calendar_id).execute()
+        # get the timezone for this calendar, to offset events
+        # if no timezone is set, default to UTC
+        time_zone = ZoneInfo(calendar.get("timeZone", "UTC"))
         # Get color themes for calendar events
         colors = service.colors().get().execute()
         event_colors = colors.get("event", {})
@@ -540,8 +545,8 @@ async def get_calendar_events(
                     if "colorId" in item
                     else None
                 ),
-                start=parse_event_time(item["start"]),
-                end=parse_event_time(item["end"]),
+                start=parse_event_time(item["start"], time_zone),
+                end=parse_event_time(item["end"], time_zone),
                 # True if the "date" field is present, which only occurs for all-day events
                 all_day="date" in item["start"],
             )
@@ -557,16 +562,21 @@ async def get_calendar_events(
 
 
 # Helper to parse the event time to datetime, no matter how Google Calendars returns it
-def parse_event_time(event_time: dict) -> datetime:
+def parse_event_time(event_time: dict, time_zone: ZoneInfo) -> datetime:
     # If an event is all-day, the "date" field is present, and a datetime needs to be created
     if "date" in event_time:
         # All-day event, parse only the date
-        return datetime.strptime(event_time["date"], "%Y-%m-%d")
+        dt = datetime.strptime(event_time["date"], "%Y-%m-%d")
     # otherwise, the "dateTime" field is present, and just needs to be converted to a datetime type
     elif "dateTime" in event_time:
         # Event with specific time
-        return datetime.fromisoformat(event_time["dateTime"])
-    return None
+        dt = datetime.fromisoformat(event_time["dateTime"])
+
+    if dt.tzinfo is None:
+        # if the timezone is not set, set it to the calendar's timezone
+        dt = dt.replace(tzinfo=time_zone)
+
+    return dt
 
 
 ############################################
