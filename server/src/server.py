@@ -572,6 +572,10 @@ def parse_event_time(event_time: dict, time_zone: ZoneInfo) -> datetime:
         # Event with specific time
         dt = datetime.fromisoformat(event_time["dateTime"])
 
+    # if the event does have a specified timezone, use that for the datetime
+    if "timeZone" in event_time:
+        dt = dt.replace(tzinfo=ZoneInfo(event_time["timeZone"]))
+
     if dt.tzinfo is None:
         # if the timezone is not set, set it to the calendar's timezone
         dt = dt.replace(tzinfo=time_zone)
