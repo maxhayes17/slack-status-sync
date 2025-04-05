@@ -13,14 +13,17 @@ type StatusEventEditFormProps = {
   onSubmit: (statusEvent: StatusEvent) => void;
   onCancel: () => void;
   onDelete: (statusEvent: StatusEvent) => void;
+  isFormError: boolean;
+
 };
 export const StatusEventEditForm = ({
   statusEvent,
   onSubmit,
   onCancel,
   onDelete,
+  isFormError,
 }: StatusEventEditFormProps) => {
-  const [isError, setIsError] = useState(false);
+  const [isError, setIsError] = useState(isFormError);
 
   const [updatedStatusEvent, setUpdatedStatusEvent] =
     useState<StatusEvent>(statusEvent);

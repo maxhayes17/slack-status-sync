@@ -422,7 +422,9 @@ async def delete_status_event(
             raise HTTPException(status_code=404, detail="Status event not found")
 
         # delete queued task for event if before the event start time
-        if datetime.now(timezone.utc) < status_event.start.replace(tzinfo=timezone.utc):
+        if status_event.task_id and datetime.now(
+            timezone.utc
+        ) < status_event.start.replace(tzinfo=timezone.utc):
             delete_task(status_event.task_id)
 
         # delete status event in DB
@@ -522,7 +524,9 @@ async def get_calendar_events(
 
         # Set constraints for the current day, and a year from the current day
         time_now = datetime.now(timezone.utc)
-        time_max = time_now + timedelta(days=365)
+        # Cloud Tasks only allows scheduling tasks up to 30 days in the future
+        # for this reason, only display events in the next 30 days
+        time_max = time_now + timedelta(days=30)
         # Get events in the specified calendar, *after* the current time
         events = (
             service.events()

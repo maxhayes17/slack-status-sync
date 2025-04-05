@@ -10,21 +10,28 @@ type StatusEventBlockProps = {
   event: StatusEvent;
 };
 export const StatusEventBlock = ({ event }: StatusEventBlockProps) => {
+  const [isError, setIsError] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
 
   const handleStatusEventEdit = async (statusEvent: StatusEvent) => {
-    console.log("Creating status event: ", statusEvent);
-    await patchStatusEvent(statusEvent);
-    closeModal();
-    window.location.reload();
+    try {
+      await patchStatusEvent(statusEvent);
+      closeModal();
+      window.location.reload();
+    } catch (error) {
+      setIsError(true);
+    }
   };
   const handleStatusEventDelete = async (statusEvent: StatusEvent) => {
-    console.log("Deleting status event: ", statusEvent);
-    await deleteStatusEvent(statusEvent);
-    closeModal();
-    window.location.reload();
+    try {
+      await deleteStatusEvent(statusEvent);
+      closeModal();
+      window.location.reload();
+    } catch (error) {
+      setIsError(true);
+    }
   };
 
   return (
@@ -57,6 +64,9 @@ export const StatusEventBlock = ({ event }: StatusEventBlockProps) => {
           onSubmit={handleStatusEventEdit}
           onCancel={closeModal}
           onDelete={handleStatusEventDelete}
+          // force form to remount when error occurs
+          key={isError ? "error" : "no error"}
+          isFormError={isError}
         />
       </Modal>
     </div>

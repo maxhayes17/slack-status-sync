@@ -33,9 +33,14 @@ export const ModalHowItWorks = ({ isOpen, onClose }: ModalHowItWorksProps) => {
               Click on event from one of your calendars to create a status event
             </p>
             <p className="text-sm text-neutral-600 dark:text-neutral-400 italic">
-              **Only one-time events are supported for status syncs. If you
-              choose a recurring event, the status will stop syncing after the
-              first occurrence.
+              Status Events can be scheduled at most 30 days in advance. For
+              this reason, only calendar events within the next 30 days will be
+              shown for each calendar.
+            </p>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 italic">
+              Only one-time events are supported for status syncs. If you choose
+              a recurring event, the status will stop syncing after the first
+              occurrence.
             </p>
           </li>
           <li className="flex flex-col space-y-2">

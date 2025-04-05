@@ -245,10 +245,16 @@ export const patchStatusEvent = async (
 
 export const deleteStatusEvent = async (statusEvent: StatusEvent) => {
   try {
-    await fetch(`${STATUS_SYNCER_SERVER_URL}/status-events/${statusEvent.id}`, {
-      method: "DELETE",
-      headers: await getAuthHeaders(),
-    });
+    const resp = await fetch(
+      `${STATUS_SYNCER_SERVER_URL}/status-events/${statusEvent.id}`,
+      {
+        method: "DELETE",
+        headers: await getAuthHeaders(),
+      }
+    );
+    if (!resp.ok) {
+      throw new Error("Failed to delete status event");
+    }
   } catch (error) {
     console.error("Error deleting status event:", error);
     throw error;

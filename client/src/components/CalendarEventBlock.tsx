@@ -14,6 +14,7 @@ export const CalendarEventBlock = ({
   event,
   color,
 }: CalendarEventBlockProps) => {
+  const [isError, setIsError] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
@@ -21,10 +22,13 @@ export const CalendarEventBlock = ({
   const handleStatusEventCreate = async (
     status_event: Partial<StatusEvent>
   ) => {
-    console.log("Creating status event: ", status_event);
-    await postStatusEvent(status_event);
-    closeModal();
-    window.location.reload();
+    try {
+      await postStatusEvent(status_event);
+      closeModal();
+      window.location.reload();
+    } catch (error) {
+      setIsError(true);
+    }
   };
 
   return (
@@ -78,6 +82,9 @@ export const CalendarEventBlock = ({
               event={event}
               onSubmit={handleStatusEventCreate}
               onCancel={closeModal}
+              // force form to remount when error occurs
+              key={isError ? "error" : "no error"}
+              isFormError={isError}
             />
           </div>
         </Modal>

@@ -19,11 +19,13 @@ type StatusEventCreateFormProps = {
   event: CalendarEvent;
   onSubmit: (statusEvent: Partial<StatusEvent>) => void;
   onCancel: () => void;
+  isFormError: boolean;
 };
 export const StatusEventCreateForm = ({
   event,
   onSubmit,
   onCancel,
+  isFormError,
 }: StatusEventCreateFormProps) => {
   const INITIAL_STATUS_EVENT: Partial<StatusEvent> = {
     calendar_id: event.calendar_id,
@@ -31,8 +33,7 @@ export const StatusEventCreateForm = ({
     start: event.start,
     end: event.end,
   };
-
-  const [isError, setIsError] = useState(false);
+  const [isError, setIsError] = useState(isFormError);
 
   const [statusEvent, setStatusEvent] =
     useState<Partial<StatusEvent>>(INITIAL_STATUS_EVENT);
