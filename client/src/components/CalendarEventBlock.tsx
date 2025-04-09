@@ -3,7 +3,7 @@ import { CalendarColor, CalendarEvent, StatusEvent } from "../utils/types";
 import { Modal } from "./Modal";
 import { StatusEventCreateForm } from "./StatusEventCreateForm";
 import { formatDateTime } from "../utils/date";
-import { postStatusEvent } from "../utils/utils";
+import { postStatusEvent } from "../utils/api";
 import { clsx } from "clsx";
 
 type CalendarEventBlockProps = {

@@ -45,6 +45,8 @@ Below are useful directories and files to know about when navigating this codeba
 
 This application is built with a FastAPI backend, a React TypeScript frontend, and integrates with multiple Google Cloud services and the Slack API.
 
+[FastAPI Server Docs](https://slack-status-syncer-server-801397650398.us-central1.run.app/docs)
+
 ### Google Cloud Services
 
 * **Cloud Build** - Automates CI/CD workflow for building and deploying the application

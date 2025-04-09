@@ -1,5 +1,5 @@
 import { Button } from "@headlessui/react";
-import { getSlackAuthentication } from "../utils/utils";
+import { getSlackAuthentication } from "../utils/api";
 
 type ButtonAddToSlackProps = {
   isDisabled?: boolean;

@@ -4,7 +4,7 @@ import {
   getCalendars,
   getStatusEvents,
   getUser,
-} from "../utils/utils";
+} from "../utils/api";
 import { CalendarSelect } from "./CalendarSelect";
 import { useEffect, useState } from "react";
 import { CalendarEventsList } from "./CalendarEventsList";

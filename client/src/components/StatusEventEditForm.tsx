@@ -4,7 +4,7 @@ import { formatDateTime } from "../utils/date";
 import { StatusEvent } from "../utils/types";
 import { useEffect, useState } from "react";
 import { ButtonPrimary } from "./ButtonPrimary";
-import { getSlackEmojis } from "../utils/utils";
+import { getSlackEmojis } from "../utils/api";
 import { EmojiSelect } from "./EmojiSelect";
 import { ErrorMessage } from "./ErrorMessage";
 

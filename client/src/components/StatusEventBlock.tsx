@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { formatDateTime } from "../utils/date";
 import { StatusEvent } from "../utils/types";
-import { deleteStatusEvent, patchStatusEvent } from "../utils/utils";
+import { deleteStatusEvent, patchStatusEvent } from "../utils/api";
 import { StatusEventEditForm } from "./StatusEventEditForm";
 import { Modal } from "./Modal";
 import { getEmojiFromName } from "../utils/emoji";
