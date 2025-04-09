@@ -16,6 +16,12 @@ Slack Status Syncer provides full control over status updates, allowing users to
 
 ### [Try it out](https://slack-status-syncer-801397650398.us-central1.run.app)
 
+Note - until this app is verified by Google, you may encounter a **Google hasn't verified this app** screen when signing in.
+
+This is normal, and not blocking. You can continue to the application sign in by clicking
+
+> Advanced > Go to slack-status-syncer.firebaseapp.com (unsafe) > Continue
+
 ---
 
 ## Project Layout
